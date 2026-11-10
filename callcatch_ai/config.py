@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     # Valeur moyenne estimée d'un chantier US (pour afficher les $ économisés à l'artisan)
     DEFAULT_JOB_VALUE_USD: float = 450.0
 
+    # Facturation & Payouts (Lemon Squeezy / Stripe connectés au compte Lead Bank)
+    PAYMENT_PROVIDER: str = "lemonsqueezy"
+    LEMON_SQUEEZY_CHECKOUT_URL: str = os.getenv("LEMON_SQUEEZY_CHECKOUT_URL", "https://callcatch.lemonsqueezy.com/buy/pro-monthly")
+    LEMON_SQUEEZY_WEBHOOK_SECRET: str = os.getenv("LEMON_SQUEEZY_WEBHOOK_SECRET", "whsec_callcatch_secret_2026")
+    LEAD_BANK_ROUTING: str = "101019644"
+    LEAD_BANK_ACCOUNT_LAST4: str = "9479"
+
     class Config:
         env_file = ".env"
         extra = "ignore"

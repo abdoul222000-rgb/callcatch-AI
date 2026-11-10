@@ -40,6 +40,12 @@
                     Twilio: <span class="text-cyan-400">{{ contractor.twilio_phone_number }}</span>
                 </div>
 
+                <!-- Plan / Billing Badge Button -->
+                <a href="/billing" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition {% if contractor.is_active_pro %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20{% else %}bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20{% endif %}" title="Manage Subscription">
+                    <i class="fa-solid {% if contractor.is_active_pro %}fa-circle-check{% else %}fa-hourglass-half{% endif %}"></i>
+                    <span>{% if contractor.is_active_pro %}PRO ($99/mo){% else %}Trial ({{ contractor.days_left_in_trial }}d){% endif %}</span>
+                </a>
+
                 <!-- LANGUAGE TOGGLE BUTTON (FR / EN) -->
                 <button id="langToggleBtn" onclick="toggleLanguage()" 
                     class="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border border-slate-600 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-md hover:scale-105 cursor-pointer">

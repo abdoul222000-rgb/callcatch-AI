@@ -93,11 +93,13 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-8">
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
                 <div class="flex items-center justify-between text-slate-400 mb-2">
-                    <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider" data-i18n="kpi_subscribers">Total Contractors</span>
+                    <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider" data-i18n="kpi_subscribers">Paying Subscribers</span>
                     <i class="fa-solid fa-users-gear text-amber-400 text-sm"></i>
                 </div>
-                <div class="text-2xl sm:text-3xl font-extrabold text-white">{{ total_contractors }}</div>
-                <div class="text-[11px] text-slate-500 mt-1" data-i18n="kpi_subscribers_sub">Subscribed artisans</div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white">
+                    <span class="text-emerald-400">{{ paying_contractors_count }}</span> <span class="text-xs text-slate-400">paying</span> / {{ total_contractors }}
+                </div>
+                <div class="text-[11px] text-slate-500 mt-1">{{ trial_contractors_count }} in 14-day free trial</div>
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
@@ -106,7 +108,7 @@
                     <i class="fa-solid fa-tag text-emerald-400 text-sm"></i>
                 </div>
                 <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400">$99.00</div>
-                <div class="text-[11px] text-slate-500 mt-1" data-i18n="kpi_mrr_per_client_sub">Charged monthly (USD)</div>
+                <div class="text-[11px] text-slate-500 mt-1">Lead Bank (***{{ lead_bank_last4 }})</div>
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
@@ -175,8 +177,16 @@
                             <td class="py-4 px-6 font-mono text-xs text-cyan-400">
                                 {{ c.twilio_phone_number }}
                             </td>
-                            <td class="py-4 px-6 font-bold text-emerald-400 font-mono">
-                                +${{ "{:,.2f}".format(c.monthly_plan_price) }} / mo
+                            <td class="py-4 px-6 font-bold font-mono">
+                                {% if c.is_active_pro %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black">
+                                    <i class="fa-solid fa-circle-check"></i> PRO +$99/mo
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold">
+                                    <i class="fa-solid fa-hourglass-half"></i> Trial ({{ c.days_left_in_trial }}d)
+                                </span>
+                                {% endif %}
                             </td>
                             <td class="py-4 px-6 font-bold text-white">
                                 {{ c.calls|length }} <span class="text-xs font-normal text-slate-400" data-i18n="calls_unit">calls</span>

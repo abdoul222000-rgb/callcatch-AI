@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, Request, Form, BackgroundTasks, HTTPExcept
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import os
 
@@ -164,6 +164,8 @@ def register_submit(
         twilio_phone_number=assigned_twilio,
         avg_ticket_usd=avg_ticket_usd,
         monthly_plan_price=99.0,
+        subscription_status="TRIAL",
+        trial_ends_at=datetime.utcnow() + timedelta(days=14),
         custom_missed_text=f"Hey! This is {owner_name.strip()} with {business_name.strip()}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
     )
     db.add(new_contractor)
@@ -247,15 +249,24 @@ def founder_dashboard(
 ):
     contractors = db.query(Contractor).order_by(Contractor.created_at.desc()).all()
     
-    # Calcul du chiffre d'affaires récurrent mensuel pour le fondateur
-    total_mrr = sum(c.monthly_plan_price for c in contractors if c.subscription_active)
+    # Calcul précis du MRR et de l'ARR réel basé sur les abonnés payants
+    paying_contractors = [c for c in contractors if getattr(c, 'subscription_status', 'TRIAL') == 'ACTIVE']
+    trial_contractors = [c for c in contractors if getattr(c, 'subscription_status', 'TRIAL') == 'TRIAL']
+    
+    total_mrr = sum(c.monthly_plan_price for c in paying_contractors)
+    total_arr = total_mrr * 12
     total_calls_processed = db.query(MissedCall).count()
 
     return templates.TemplateResponse(request=request, name="founder/dashboard.html", context={
         "contractors": contractors,
         "total_contractors": len(contractors),
+        "paying_contractors_count": len(paying_contractors),
+        "trial_contractors_count": len(trial_contractors),
         "total_mrr": total_mrr,
-        "total_calls_processed": total_calls_processed
+        "total_arr": total_arr,
+        "total_calls_processed": total_calls_processed,
+        "lead_bank_routing": settings.LEAD_BANK_ROUTING,
+        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4
     })
 
 
@@ -364,6 +375,60 @@ async def lead_manual_reply(
     db.commit()
 
     return RedirectResponse(url=f"/leads/{call.id}", status_code=303)
+
+
+# ==============================================================================
+# FACTURATION & ABONNEMENTS US (LEMON SQUEEZY / STRIPE -> LEAD BANK)
+# ==============================================================================
+
+@app.get("/billing", response_class=HTMLResponse)
+def billing_page(
+    request: Request,
+    current_contractor: Contractor = Depends(get_current_contractor)
+):
+    """Page de gestion de l'abonnement PRO pour l'artisan US"""
+    return templates.TemplateResponse(request=request, name="billing.html", context={
+        "contractor": current_contractor,
+        "checkout_url": settings.LEMON_SQUEEZY_CHECKOUT_URL,
+        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4
+    })
+
+
+@app.post("/api/demo/simulate-upgrade")
+def simulate_upgrade(
+    current_contractor: Contractor = Depends(get_current_contractor),
+    db: Session = Depends(get_db)
+):
+    """Bascule immédiatement l'artisan en Plan PRO ($99/mo) pour tester le flux complet et voir grimper le MRR"""
+    current_contractor.subscription_status = "ACTIVE"
+    current_contractor.subscription_active = True
+    current_contractor.subscription_id = f"sub_us_{random.randint(100000, 999999)}"
+    db.commit()
+    return {"success": True, "status": "ACTIVE", "plan": "PRO ($99/mo)"}
+
+
+@app.post("/webhook/lemonsqueezy")
+async def lemonsqueezy_webhook(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Webhook officiel pour valider les abonnements récurrents et débloquer les comptes"""
+    try:
+        payload = await request.json()
+        event_name = payload.get("meta", {}).get("event_name", "")
+        customer_email = payload.get("data", {}).get("attributes", {}).get("user_email", "")
+
+        if any(keyword in event_name for keyword in ["subscription", "order_created", "payment_success"]):
+            if customer_email:
+                contractor = db.query(Contractor).filter(Contractor.email == customer_email.lower().strip()).first()
+                if contractor:
+                    contractor.subscription_status = "ACTIVE"
+                    contractor.subscription_active = True
+                    contractor.subscription_id = str(payload.get("data", {}).get("id", ""))
+                    db.commit()
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
 
 
 # ==============================================================================

@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import secrets
 from .config import settings
@@ -56,12 +56,27 @@ class Contractor(Base):
         default="Hey! This is {owner_name} with {business_name}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
     )
     
-    # Paramètres économiques
+    # Paramètres économiques et abonnement
     avg_ticket_usd = Column(Float, default=450.0) # Gain moyen par intervention
     subscription_active = Column(Boolean, default=True)
     monthly_plan_price = Column(Float, default=99.0) # 99$/mois
+    subscription_status = Column(String(30), default="TRIAL") # TRIAL, ACTIVE, CANCELLED
+    trial_ends_at = Column(DateTime, nullable=True)
+    subscription_id = Column(String(100), nullable=True)
+    billing_email = Column(String(120), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    @property
+    def is_active_pro(self) -> bool:
+        return self.subscription_status == "ACTIVE"
+
+    @property
+    def days_left_in_trial(self) -> int:
+        if not self.trial_ends_at:
+            return 14
+        delta = self.trial_ends_at - datetime.utcnow()
+        return max(0, delta.days)
 
     # Relations
     calls = relationship("MissedCall", back_populates="contractor", cascade="all, delete-orphan")
@@ -118,6 +133,24 @@ class SMSMessage(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    
+    # Mise à niveau sécurisée de la base de données existante (sans perte de données)
+    try:
+        with engine.connect() as conn:
+            for col_sql in [
+                "ALTER TABLE contractors ADD COLUMN subscription_status VARCHAR(30) DEFAULT 'TRIAL'",
+                "ALTER TABLE contractors ADD COLUMN trial_ends_at DATETIME",
+                "ALTER TABLE contractors ADD COLUMN subscription_id VARCHAR(100)",
+                "ALTER TABLE contractors ADD COLUMN billing_email VARCHAR(120)"
+            ]:
+                try:
+                    conn.execute(text(col_sql))
+                    conn.commit()
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
     db = SessionLocal()
     try:
         # Créer le compte artisan de démonstration (Mike le plombier) s'il n'existe pas
@@ -133,10 +166,18 @@ def init_db():
                 twilio_phone_number="+15128889479",
                 avg_ticket_usd=550.0,
                 monthly_plan_price=99.0,
+                subscription_status="TRIAL",
+                trial_ends_at=datetime.utcnow() + timedelta(days=12),
                 custom_missed_text="Hey! This is Mike with Lone Star Plumbing. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
             )
             db.add(demo_contractor)
             db.commit()
+        else:
+            # S'assurer que les dates d'essai sont définies
+            if not contractor.trial_ends_at:
+                contractor.trial_ends_at = datetime.utcnow() + timedelta(days=12)
+                contractor.subscription_status = "TRIAL"
+                db.commit()
     finally:
         db.close()
 
