@@ -19,7 +19,7 @@ from .security import (
 from .services.twilio_service import send_sms_via_twilio
 from .services.ai_agent import process_inbound_sms_with_ai
 
-app = FastAPI(title=settings.APP_NAME)
+app = FastAPI(title="CallCatch AI - Missed Call Text-Back & Auto-Booking")
 
 # 1. Protection Globale : Injection des en-têtes de sécurité bancaires
 app.add_middleware(SecurityHeadersMiddleware)
@@ -85,7 +85,7 @@ def index(contractor = Depends(get_optional_contractor)):
 def login_page(request: Request, contractor = Depends(get_optional_contractor)):
     if contractor:
         return RedirectResponse(url="/dashboard")
-    return templates.TemplateResponse("auth/login.html", {"request": request, "error": None})
+    return templates.TemplateResponse(request=request, name="auth/login.html", context={"error": None})
 
 
 @app.post("/login", response_class=HTMLResponse)
@@ -102,8 +102,7 @@ def login_submit(
     
     if not contractor or not verify_password(password, contractor.hashed_password):
         record_failed_attempt(request)
-        return templates.TemplateResponse("auth/login.html", {
-            "request": request,
+        return templates.TemplateResponse(request=request, name="auth/login.html", context={
             "error": "Identifiants invalides / Invalid email or password.",
             "email": email
         })
@@ -127,7 +126,7 @@ def login_submit(
 def register_page(request: Request, contractor = Depends(get_optional_contractor)):
     if contractor:
         return RedirectResponse(url="/dashboard")
-    return templates.TemplateResponse("auth/register.html", {"request": request, "error": None})
+    return templates.TemplateResponse(request=request, name="auth/register.html", context={"error": None})
 
 
 @app.post("/register", response_class=HTMLResponse)
@@ -147,8 +146,7 @@ def register_submit(
     
     existing = db.query(Contractor).filter(Contractor.email == cleaned_email).first()
     if existing:
-        return templates.TemplateResponse("auth/register.html", {
-            "request": request,
+        return templates.TemplateResponse(request=request, name="auth/register.html", context={
             "error": "Cet email est déjà utilisé / This email is already registered."
         })
 
@@ -197,7 +195,7 @@ def logout():
 
 @app.get("/founder/login", response_class=HTMLResponse)
 def founder_login_page(request: Request):
-    return templates.TemplateResponse("founder/login.html", {"request": request, "error": None})
+    return templates.TemplateResponse(request=request, name="founder/login.html", context={"error": None})
 
 
 @app.post("/founder/login", response_class=HTMLResponse)
@@ -235,8 +233,7 @@ def founder_login_submit(
         return response
     else:
         record_failed_attempt(request)
-        return templates.TemplateResponse("founder/login.html", {
-            "request": request,
+        return templates.TemplateResponse(request=request, name="founder/login.html", context={
             "error": "Accès refusé. Clés Maîtres invalides / Invalid founder credentials.",
             "email": email
         })
@@ -254,8 +251,7 @@ def founder_dashboard(
     total_mrr = sum(c.monthly_plan_price for c in contractors if c.subscription_active)
     total_calls_processed = db.query(MissedCall).count()
 
-    return templates.TemplateResponse("founder/dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="founder/dashboard.html", context={
         "contractors": contractors,
         "total_contractors": len(contractors),
         "total_mrr": total_mrr,
@@ -311,8 +307,7 @@ def dashboard(
         "roi_multiplier": max(roi_multiplier, 1.0) if total_revenue_saved > 0 else 0
     }
 
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="dashboard.html", context={
         "contractor": current_contractor,
         "calls": calls,
         "total_revenue_saved": total_revenue_saved,
@@ -335,8 +330,7 @@ def lead_detail(
     if not call:
         return RedirectResponse(url="/dashboard")
         
-    return templates.TemplateResponse("lead_detail.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="lead_detail.html", context={
         "call": call,
         "contractor": current_contractor
     })

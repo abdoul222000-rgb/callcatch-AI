@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     APP_NAME: str = "CallCatch AI"
+    CALLCATCH_APP_NAME: str = "CallCatch AI"
     CALLCATCH_SECRET_KEY: str = "super-secret-key-callcatch-2026-high-security"
     CALLCATCH_DATABASE_URL: str = "sqlite:///./callcatch.db"
     
