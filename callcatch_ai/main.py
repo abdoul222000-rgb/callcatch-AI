@@ -70,19 +70,29 @@ def get_current_founder(request: Request):
     return True
 
 
-@app.get("/", response_class=HTMLResponse)
-def index(contractor = Depends(get_optional_contractor)):
+@app.api_route("/", methods=["GET", "HEAD"])
+def index(request: Request, contractor = Depends(get_optional_contractor)):
+    if request.method == "HEAD":
+        return Response(status_code=200)
     if contractor:
         return RedirectResponse(url="/dashboard")
     return RedirectResponse(url="/login")
+
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health_check():
+    """Endpoint de surveillance santé 24/7 pour UptimeRobot et Render"""
+    return {"status": "ok", "service": "CallCatch AI", "timestamp": datetime.utcnow().isoformat()}
 
 
 # ==============================================================================
 # AUTHENTIFICATION ARTISANS (AVEC BRUTE-FORCE SHIELD)
 # ==============================================================================
 
-@app.get("/login", response_class=HTMLResponse)
+@app.api_route("/login", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def login_page(request: Request, contractor = Depends(get_optional_contractor)):
+    if request.method == "HEAD":
+        return Response(status_code=200)
     if contractor:
         return RedirectResponse(url="/dashboard")
     return templates.TemplateResponse(request=request, name="auth/login.html", context={"error": None})
