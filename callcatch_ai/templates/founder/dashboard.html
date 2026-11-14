@@ -576,7 +576,12 @@
                             <td class="py-4 px-6 font-bold text-white">
                                 {{ c.calls|length }} <span class="text-xs font-normal text-slate-400" data-i18n="calls_unit">calls</span>
                             </td>
-                            <td class="py-4 px-6 text-right">
+                            <td class="py-4 px-6 text-right space-x-2">
+                                {% if not c.is_active_pro %}
+                                <a href="/founder/activate-pro/{{ c.id }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-500 px-3 py-1.5 rounded-xl transition" title="Valider virement ACH Grey">
+                                    <i class="fa-solid fa-circle-check"></i> <span data-i18n="btn_activate_pro">Activate PRO ($99)</span>
+                                </a>
+                                {% endif %}
                                 <a href="/founder/switch-to/{{ c.id }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:border-amber-500 px-3 py-1.5 rounded-xl transition">
                                     <i class="fa-solid fa-eye"></i> <span data-i18n="btn_inspect">Inspect Dashboard</span>
                                 </a>
@@ -613,7 +618,13 @@
                     </div>
 
                     <div class="pt-1 flex items-center justify-between text-xs font-mono text-cyan-400 border-t border-slate-900">
-                        <span>Portal: Active</span>
+                        {% if not c.is_active_pro %}
+                        <a href="/founder/activate-pro/{{ c.id }}" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> <span data-i18n="btn_activate_pro">Activate PRO</span>
+                        </a>
+                        {% else %}
+                        <span class="text-emerald-400 font-bold">● PRO Active</span>
+                        {% endif %}
                         <a href="/founder/switch-to/{{ c.id }}" class="text-amber-400 font-bold hover:underline flex items-center gap-1">
                             <span data-i18n="mobile_view">Inspect</span> <i class="fa-solid fa-arrow-right"></i>
                         </a>
@@ -690,6 +701,7 @@
                 col_calls: "Calls Caught",
                 col_actions: "Master Action",
                 btn_inspect: "Inspect Dashboard",
+                btn_activate_pro: "Activate PRO ($99)",
                 calls_unit: "calls",
                 mobile_trade: "Trade",
                 mobile_calls: "Calls Caught",
@@ -757,6 +769,7 @@
                 col_calls: "Appels Sauvegardés",
                 col_actions: "Action Maître",
                 btn_inspect: "Inspecter le Dashboard",
+                btn_activate_pro: "Activer PRO ($99)",
                 calls_unit: "appels",
                 mobile_trade: "Métier",
                 mobile_calls: "Appels Sauvegardés",

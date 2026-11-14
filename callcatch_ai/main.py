@@ -374,6 +374,39 @@ def founder_switch_to_contractor(
     return response
 
 
+@app.get("/founder/activate-pro/{contractor_id}")
+def founder_activate_pro(
+    contractor_id: int, 
+    authorized: bool = Depends(get_current_founder),
+    db: Session = Depends(get_db)
+):
+    """Permet au Fondateur de valider manuellement l'abonnement PRO ($99/mo) après réception du virement sur Grey"""
+    contractor = db.query(Contractor).filter(Contractor.id == contractor_id).first()
+    if contractor:
+        contractor.subscription_status = "ACTIVE"
+        contractor.subscription_active = True
+        contractor.monthly_plan_price = 99.0
+        
+        order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        new_order = SubscriptionOrder(
+            order_number=order_num,
+            customer_name=contractor.owner_name,
+            customer_email=contractor.email,
+            company_name=contractor.business_name,
+            city="US Client",
+            state="US",
+            plan_name="Pro Auto-Catch ($99/mo)",
+            amount_usd=99.0,
+            status="ACTIVE",
+            payment_method="Lead Bank (Direct ACH ••••9479)",
+            next_billing_date=datetime.utcnow() + timedelta(days=30),
+            created_at=datetime.utcnow()
+        )
+        db.add(new_order)
+        db.commit()
+    return RedirectResponse(url="/founder", status_code=status.HTTP_303_SEE_OTHER)
+
+
 @app.get("/founder/logout")
 def founder_logout():
     response = RedirectResponse(url="/founder/login")
@@ -477,8 +510,43 @@ def billing_page(
     return templates.TemplateResponse(request=request, name="billing.html", context={
         "contractor": current_contractor,
         "checkout_url": settings.LEMON_SQUEEZY_CHECKOUT_URL,
-        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4
+        "lead_bank_name": settings.LEAD_BANK_NAME,
+        "lead_bank_beneficiary": settings.LEAD_BANK_BENEFICIARY_NAME,
+        "lead_bank_account_number": settings.LEAD_BANK_ACCOUNT_NUMBER,
+        "lead_bank_account_type": settings.LEAD_BANK_ACCOUNT_TYPE,
+        "lead_bank_routing": settings.LEAD_BANK_ROUTING,
+        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4,
+        "payment_provider": settings.PAYMENT_PROVIDER
     })
+
+
+@app.post("/api/billing/notify-ach")
+def notify_ach_transfer(
+    current_contractor: Contractor = Depends(get_current_contractor),
+    db: Session = Depends(get_db)
+):
+    """Enregistre la soumission d'un virement ACH Direct Lead Bank par l'artisan"""
+    order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    new_order = SubscriptionOrder(
+        order_number=order_num,
+        customer_name=current_contractor.owner_name,
+        customer_email=current_contractor.email,
+        company_name=current_contractor.business_name,
+        city="US Client",
+        state="US",
+        plan_name="Pro Auto-Catch ($99/mo)",
+        amount_usd=99.0,
+        status="ACTIVE",
+        payment_method="Lead Bank (Direct ACH ••••9479)",
+        next_billing_date=datetime.utcnow() + timedelta(days=30),
+        created_at=datetime.utcnow()
+    )
+    current_contractor.subscription_status = "ACTIVE"
+    current_contractor.subscription_active = True
+    current_contractor.monthly_plan_price = 99.0
+    db.add(new_order)
+    db.commit()
+    return {"success": True, "order_number": order_num, "message": "Paiement ACH enregistré. Plan PRO activé avec succès."}
 
 
 @app.post("/api/demo/simulate-upgrade")

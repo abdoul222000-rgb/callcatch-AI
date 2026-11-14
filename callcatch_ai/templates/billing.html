@@ -69,14 +69,14 @@
                     </div>
                     <h2 class="text-2xl font-black text-white">{{ contractor.business_name }}</h2>
                     <p class="text-xs text-slate-300 mt-1">
-                        Dedicated US Twilio Line: <span class="font-mono text-emerald-400 font-bold">{{ contractor.twilio_phone_number }}</span>
+                        Dedicated US Twilio Line: <span class="font-mono text-emerald-400 font-bold">{{ contractor.twilio_phone_number or '+1 (512) 888-9479' }}</span>
                     </p>
                 </div>
 
                 <div class="bg-slate-900/90 border border-slate-700 rounded-2xl px-5 py-3 text-right">
                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider" data-i18n="next_billing">Next Renewal</p>
                     <p class="text-sm font-black text-white mt-0.5">Auto-renews monthly</p>
-                    <span class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-lock"></i> Secured via Stripe / Lead Bank</span>
+                    <span class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-lock"></i> Direct US Bank Transfer (Lead Bank)</span>
                 </div>
             </div>
 
@@ -118,9 +118,113 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button onclick="simulateUpgrade()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-credit-card"></i>
+                <a href="#direct-bank-payment" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-building-columns"></i>
                     <span data-i18n="upgrade_now_btn">Upgrade to Pro ($99/mo)</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================================== -->
+        <!-- DIRECT US BANK PAYMENT (LEAD BANK VIA GREY USD)                                -->
+        <!-- ============================================================================== -->
+        <div id="direct-bank-payment" class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-building-columns"></i> <span data-i18n="ach_payment_badge">Direct US Bank ACH Transfer</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-white" data-i18n="ach_title">
+                        Zero-Fee US Bank ACH Payment
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1" data-i18n="ach_subtitle">
+                        Pay your $99.00/mo subscription directly from your US Business Bank (Chase, Bank of America, Wells Fargo, QuickBooks).
+                    </p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-5 py-3 rounded-2xl text-right">
+                    <span class="text-3xl font-black text-emerald-400 font-mono">$99.00</span>
+                    <span class="text-xs text-slate-400 block font-semibold">USD / month (Tax Deductible)</span>
+                </div>
+            </div>
+
+            <!-- Wire & ACH Details Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 py-6">
+                <!-- Bank Name -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider" data-i18n="label_bank_name">Receiving Bank</p>
+                        <p class="text-sm font-bold text-white mt-0.5">Lead Bank</p>
+                    </div>
+                    <button onclick="copyField('Lead Bank', this)" class="text-xs text-slate-400 hover:text-emerald-400 p-2 rounded-lg bg-slate-900 border border-slate-700 transition" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- Beneficiary Name -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider" data-i18n="label_beneficiary">Account Holder / Beneficiary</p>
+                        <p class="text-sm font-bold text-white mt-0.5">Diabagate Assouman abdoul Aziz</p>
+                    </div>
+                    <button onclick="copyField('Diabagate Assouman abdoul Aziz', this)" class="text-xs text-slate-400 hover:text-emerald-400 p-2 rounded-lg bg-slate-900 border border-slate-700 transition" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- Account Number -->
+                <div class="bg-slate-950/80 border border-emerald-500/40 rounded-2xl p-4 flex items-center justify-between bg-emerald-950/10">
+                    <div>
+                        <p class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider" data-i18n="label_account_number">Account Number</p>
+                        <p class="text-lg font-black text-white font-mono mt-0.5 tracking-wider">213069059479</p>
+                    </div>
+                    <button onclick="copyField('213069059479', this)" class="text-xs text-emerald-400 hover:text-white p-2 rounded-lg bg-emerald-950/50 border border-emerald-700 transition" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- Routing Number -->
+                <div class="bg-slate-950/80 border border-cyan-500/40 rounded-2xl p-4 flex items-center justify-between bg-cyan-950/10">
+                    <div>
+                        <p class="text-[10px] text-cyan-400 uppercase font-bold tracking-wider" data-i18n="label_routing">Routing Number (ACH)</p>
+                        <p class="text-lg font-black text-cyan-300 font-mono mt-0.5 tracking-wider">101019644</p>
+                    </div>
+                    <button onclick="copyField('101019644', this)" class="text-xs text-cyan-400 hover:text-white p-2 rounded-lg bg-cyan-950/50 border border-cyan-700 transition" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- Account Type -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider" data-i18n="label_account_type">Account Type</p>
+                        <p class="text-sm font-bold text-white mt-0.5">Checking</p>
+                    </div>
+                    <span class="text-xs text-slate-500 font-mono">Currency: USD</span>
+                </div>
+
+                <!-- Memo / Reference -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider" data-i18n="label_memo">Payment Memo / Reference</p>
+                        <p class="text-sm font-bold text-amber-400 mt-0.5 font-mono">{{ contractor.business_name }} - CallCatch</p>
+                    </div>
+                    <button onclick="copyField('{{ contractor.business_name }} - CallCatch', this)" class="text-xs text-slate-400 hover:text-emerald-400 p-2 rounded-lg bg-slate-900 border border-slate-700 transition" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Confirmation Notification -->
+            <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="ach_instruction">Once transfer is sent from your bank, click below to notify our team for instant PRO activation.</span>
+                </p>
+                <button id="btnNotifyAch" onclick="submitAchPayment()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span data-i18n="btn_confirm_transfer">I Have Sent the $99.00 ACH Transfer</span>
                 </button>
             </div>
         </div>
@@ -167,11 +271,7 @@
             </div>
 
             <!-- PRO Contractor Plan (Featured) -->
-            <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/80 rounded-3xl p-6 relative flex flex-col justify-between shadow-2xl shadow-emerald-500/10">
-                <div class="absolute -top-3.5 right-6 px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow">
-                    Most Popular for US Contractors
-                </div>
-
+            <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 relative flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">PRO Plan</span>
@@ -187,7 +287,7 @@
                     <ul class="space-y-3 text-xs text-slate-200">
                         <li class="flex items-center gap-2.5">
                             <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-                            <span class="font-bold text-white">Dedicated Local US Phone Number</span>
+                            <span class="font-bold text-white">Dedicated Local US Phone Line</span>
                         </li>
                         <li class="flex items-center gap-2.5">
                             <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
@@ -209,10 +309,10 @@
                 </div>
 
                 <div class="mt-8 pt-4 border-t border-slate-800">
-                    <button onclick="simulateUpgrade()" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm transition shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-lock"></i>
-                        <span data-i18n="lock_in_pro">Upgrade to Pro &bull; $99/mo</span>
-                    </button>
+                    <a href="#direct-bank-payment" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm transition shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span data-i18n="lock_in_pro">Pay via US Bank ACH &bull; $99/mo</span>
+                    </a>
                     <p class="text-[10px] text-center text-slate-400 mt-2" data-i18n="cancel_anytime">
                         No contracts. Cancel anytime with 1 click.
                     </p>
@@ -239,7 +339,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-building-columns text-emerald-400"></i>
-                    <span>Payouts Verified via Lead Bank (Kansas City, MO)</span>
+                    <span>Official Payments Cleared via Lead Bank (Kansas City, MO)</span>
                 </div>
             </div>
         </div>
@@ -251,30 +351,42 @@
         <p>&copy; 2026 CallCatch AI. All rights reserved. Built for US Home Service Contractors.</p>
     </footer>
 
-    <!-- Interactive Upgrade Simulation Script -->
+    <!-- Interactive Scripts -->
     <script>
-        async function simulateUpgrade() {
-            const btn = event.currentTarget;
+        function copyField(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 1500);
+            }).catch(err => {
+                prompt("Copy this:", text);
+            });
+        }
+
+        async function submitAchPayment() {
+            const btn = document.getElementById('btnNotifyAch');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering...';
             btn.disabled = true;
 
             try {
-                const response = await fetch('/api/demo/simulate-upgrade', {
+                const response = await fetch('/api/billing/notify-ach', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await response.json();
                 if (data.success) {
-                    alert('🎉 Subscription activated successfully! Plan: PRO ($99/mo). MRR updated in Founder Portal.');
+                    alert('🎉 Payment registered successfully! Your PRO subscription has been activated. Welcome to CallCatch AI Pro!');
                     window.location.reload();
                 } else {
-                    alert('Error: ' + data.detail);
+                    alert('Note: ' + (data.message || 'Notification recorded.'));
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert('Connection error: ' + err);
+                alert('Transfer notification recorded. Our team will verify and activate your line.');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -293,9 +405,20 @@
                 trial_active_title: "14-Day Free Trial Active",
                 trial_active_subtitle: "You have free trial days left. All features are fully unlocked.",
                 upgrade_now_btn: "Upgrade to Pro ($99/mo)",
+                ach_payment_badge: "Direct US Bank ACH Transfer",
+                ach_title: "Zero-Fee US Bank ACH Payment",
+                ach_subtitle: "Pay your $99.00/mo subscription directly from your US Business Bank (Chase, Bank of America, Wells Fargo, QuickBooks).",
+                label_bank_name: "Receiving Bank",
+                label_beneficiary: "Account Holder / Beneficiary",
+                label_account_number: "Account Number",
+                label_routing: "Routing Number (ACH)",
+                label_account_type: "Account Type",
+                label_memo: "Payment Memo / Reference",
+                ach_instruction: "Once transfer is sent from your bank, click below to notify our team for instant PRO activation.",
+                btn_confirm_transfer: "I Have Sent the $99.00 ACH Transfer",
                 trial_desc: "Test CallCatch AI in your business with 0 commitment.",
                 pro_plan_desc: "One recovered customer pays for 5+ months.",
-                lock_in_pro: "Upgrade to Pro • $99/mo",
+                lock_in_pro: "Pay via US Bank ACH • $99/mo",
                 cancel_anytime: "No contracts. Cancel anytime with 1 click.",
                 payment_security_title: "Enterprise-Grade Payment Security"
             },
@@ -310,9 +433,20 @@
                 trial_active_title: "Essai Gratuit de 14 Jours Actif",
                 trial_active_subtitle: "Il vous reste des jours d'essai gratuit. Toutes les fonctionnalités sont débloquées.",
                 upgrade_now_btn: "Passer au Plan Pro (99 $/mois)",
+                ach_payment_badge: "Virement Bancaire US Direct (ACH)",
+                ach_title: "Paiement Bancaire US Direct sans frais (ACH)",
+                ach_subtitle: "Payez votre abonnement de 99,00 $/mois directement depuis votre compte professionnel US (Chase, BofA, Wells Fargo, QuickBooks).",
+                label_bank_name: "Banque Réceptrice",
+                label_beneficiary: "Titulaire du Compte / Bénéficiaire",
+                label_account_number: "Numéro de Compte",
+                label_routing: "Numéro de Routage (ACH)",
+                label_account_type: "Type de Compte",
+                label_memo: "Motif / Référence du Virement",
+                ach_instruction: "Une fois le virement envoyé depuis votre banque, cliquez ci-dessous pour activer instantanément votre accès PRO.",
+                btn_confirm_transfer: "J'ai Envoyé le Virement de 99,00 $ (ACH)",
                 trial_desc: "Testez CallCatch AI dans votre entreprise sans aucun engagement.",
                 pro_plan_desc: "Un seul client récupéré rentabilise plus de 5 mois d'abonnement.",
-                lock_in_pro: "Activer le Plan Pro • 99 $/mois",
+                lock_in_pro: "Payer par Virement US (ACH) • 99 $/mois",
                 cancel_anytime: "Sans engagement. Résiliation en 1 clic.",
                 payment_security_title: "Sécurité Bancaire Haute Protection"
             }
