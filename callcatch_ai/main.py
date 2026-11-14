@@ -330,9 +330,9 @@ def founder_dashboard(
     tx_count = len([v for v in visitors if v.region == "TX"])
     az_count = len([v for v in visitors if v.region == "AZ"])
 
-    fl_pct = round((fl_count / max(total_visitors, 1)) * 100, 1)
-    tx_pct = round((tx_count / max(total_visitors, 1)) * 100, 1)
-    az_pct = round((az_count / max(total_visitors, 1)) * 100, 1)
+    fl_pct = round((fl_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
+    tx_pct = round((tx_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
+    az_pct = round((az_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
 
     return templates.TemplateResponse(request=request, name="founder/dashboard.html", context={
         "contractors": contractors,
@@ -346,8 +346,8 @@ def founder_dashboard(
         "total_subscribers": total_subscribers,
         "total_store_revenue": total_store_revenue,
         "visitors": visitors[:15],
-        "total_visitors": max(total_visitors, 47),
-        "live_visitors_count": max(live_visitors_count, 3),
+        "total_visitors": total_visitors,
+        "live_visitors_count": live_visitors_count,
         "top_zones": top_zones,
         "fl_pct": fl_pct,
         "tx_pct": tx_pct,

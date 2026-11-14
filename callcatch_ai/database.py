@@ -216,89 +216,14 @@ def init_db():
                 contractor.subscription_status = "TRIAL"
                 db.commit()
 
-        # 2. Créer des souscriptions réelles de boutique si vide
-        if db.query(SubscriptionOrder).count() == 0:
-            now = datetime.utcnow()
-            seed_orders = [
-                SubscriptionOrder(
-                    order_number="ORD-US-2026-8812",
-                    customer_name="Mike Anderson",
-                    customer_email="mike@lonestarplumbing.com",
-                    company_name="Lone Star Rapid Plumbing",
-                    city="Austin",
-                    state="TX",
-                    plan_name="Pro Auto-Catch ($99/mo)",
-                    amount_usd=99.0,
-                    status="ACTIVE",
-                    payment_method="Lead Bank (Direct ACH ••••9479)",
-                    next_billing_date=now + timedelta(days=21),
-                    created_at=now - timedelta(days=9)
-                ),
-                SubscriptionOrder(
-                    order_number="ORD-US-2026-8819",
-                    customer_name="Patrick Miller",
-                    customer_email="patrickspressurewashingllc@gmail.com",
-                    company_name="Patrick's Pressure Washing LLC",
-                    city="Sarasota",
-                    state="FL",
-                    plan_name="Elite Multi-Route ($149/mo)",
-                    amount_usd=149.0,
-                    status="ACTIVE",
-                    payment_method="Visa Business (US Card ••••4129)",
-                    next_billing_date=now + timedelta(days=27),
-                    created_at=now - timedelta(days=3)
-                ),
-                SubscriptionOrder(
-                    order_number="ORD-US-2026-8824",
-                    customer_name="David Vance",
-                    customer_email="cftldave@gmail.com",
-                    company_name="Central Florida Tree & Landscape",
-                    city="Orlando",
-                    state="FL",
-                    plan_name="Pro Auto-Catch ($99/mo)",
-                    amount_usd=99.0,
-                    status="ACTIVE",
-                    payment_method="Mastercard (US Card ••••8811)",
-                    next_billing_date=now + timedelta(days=29),
-                    created_at=now - timedelta(days=1)
-                ),
-                SubscriptionOrder(
-                    order_number="ORD-US-2026-8830",
-                    customer_name="Carlos Mendez",
-                    customer_email="portillomobiledetailing@gmail.com",
-                    company_name="Portillo Mobile Detailing",
-                    city="Miami",
-                    state="FL",
-                    plan_name="Solo Operator ($99/mo)",
-                    amount_usd=99.0,
-                    status="TRIALING",
-                    payment_method="Lead Bank (Direct ACH ••••9479)",
-                    next_billing_date=now + timedelta(days=14),
-                    created_at=now - timedelta(hours=6)
-                )
-            ]
-            for order in seed_orders:
-                db.add(order)
+        # 2. Nettoyage strict : purge de toute commande ou visite de simulation
+        # Le compteur ne démarre que sur les paiements et visiteurs 100% réels
+        try:
+            db.query(SubscriptionOrder).filter(SubscriptionOrder.order_number.like("ORD-US-2026-88%")).delete(synchronize_session=False)
+            db.query(SiteVisitor).filter(SiteVisitor.referrer.like("Cold Email%")).delete(synchronize_session=False)
             db.commit()
-
-        # 3. Créer des visites géolocalisées en temps réel si vide
-        if db.query(SiteVisitor).count() == 0:
-            now = datetime.utcnow()
-            seed_visitors = [
-                SiteVisitor(ip_address="172.56.21.84", city="Tampa", region="FL", country="United States", country_code="US", page_visited="/", referrer="Cold Email (Lawn Care FL)", device_type="Mobile (iPhone 15)", browser="Mobile Safari", is_live=True, visited_at=now - timedelta(minutes=2)),
-                SiteVisitor(ip_address="174.244.18.92", city="Orlando", region="FL", country="United States", country_code="US", page_visited="/demo", referrer="Cold Email (Painting FL)", device_type="Desktop (MacBook)", browser="Chrome 131", is_live=True, visited_at=now - timedelta(minutes=5)),
-                SiteVisitor(ip_address="166.198.85.10", city="Dallas", region="TX", country="United States", country_code="US", page_visited="/login", referrer="Cold Email (Locksmith TX)", device_type="Mobile (Samsung Galaxy)", browser="Chrome Mobile", is_live=True, visited_at=now - timedelta(minutes=9)),
-                SiteVisitor(ip_address="172.58.44.120", city="Houston", region="TX", country="United States", country_code="US", page_visited="/", referrer="Cold Email (Tree Service TX)", device_type="Mobile (iPhone 14)", browser="Mobile Safari", is_live=False, visited_at=now - timedelta(minutes=23)),
-                SiteVisitor(ip_address="107.77.201.55", city="Sarasota", region="FL", country="United States", country_code="US", page_visited="/pricing", referrer="Cold Email (Pressure Washing FL)", device_type="Desktop (Windows 11)", browser="Edge 130", is_live=False, visited_at=now - timedelta(minutes=45)),
-                SiteVisitor(ip_address="174.212.98.61", city="Naples", region="FL", country="United States", country_code="US", page_visited="/demo", referrer="Cold Email (Pool Services FL)", device_type="Mobile (iPhone 13)", browser="Mobile Safari", is_live=False, visited_at=now - timedelta(hours=1, minutes=15)),
-                SiteVisitor(ip_address="166.216.158.4", city="Austin", region="TX", country="United States", country_code="US", page_visited="/", referrer="Cold Email (HVAC Austin)", device_type="Desktop (Windows 10)", browser="Chrome 131", is_live=False, visited_at=now - timedelta(hours=2, minutes=10)),
-                SiteVisitor(ip_address="174.238.112.7", city="Boca Raton", region="FL", country="United States", country_code="US", page_visited="/pricing", referrer="Cold Email (Mobile Detailing FL)", device_type="Mobile (iPhone 15 Pro)", browser="Mobile Safari", is_live=False, visited_at=now - timedelta(hours=3, minutes=20)),
-                SiteVisitor(ip_address="107.122.84.39", city="Scottsdale", region="AZ", country="United States", country_code="US", page_visited="/", referrer="Cold Email (Roofing AZ)", device_type="Desktop (MacBook Pro)", browser="Safari 18", is_live=False, visited_at=now - timedelta(hours=4, minutes=5)),
-                SiteVisitor(ip_address="172.56.90.142", city="Miami", region="FL", country="United States", country_code="US", page_visited="/demo", referrer="Cold Email (Plumbing Miami)", device_type="Mobile (iPhone 14)", browser="Mobile Safari", is_live=False, visited_at=now - timedelta(hours=5, minutes=40)),
-            ]
-            for v in seed_visitors:
-                db.add(v)
-            db.commit()
+        except Exception:
+            pass
     finally:
         db.close()
 

@@ -79,9 +79,15 @@
                         <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
                             ${{ "{:,.2f}".format(total_mrr) }}
                         </h2>
+                        {% if total_mrr > 0 %}
                         <span class="text-emerald-400 text-sm font-bold flex items-center gap-1">
                             <i class="fa-solid fa-arrow-trend-up"></i> +100% active
                         </span>
+                        {% else %}
+                        <span class="text-slate-400 text-sm font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-clock text-amber-400"></i> <span data-i18n="awaiting_first_sub">Awaiting first live subscriber</span>
+                        </span>
+                        {% endif %}
                     </div>
                     <p class="text-xs sm:text-sm text-slate-400 mt-2">
                         <span data-i18n="arr_projection">Annual Run-Rate (ARR) projected:</span>
@@ -181,7 +187,7 @@
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
                         <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="stat_total_visitors">Total Unique Hits</div>
                         <div class="text-2xl font-black text-white mt-1">{{ total_visitors }}</div>
-                        <div class="text-[11px] text-cyan-400 font-medium mt-1">100% Verified US Traffic</div>
+                        <div class="text-[11px] text-cyan-400 font-medium mt-1">100% Real-time Verified</div>
                     </div>
 
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
@@ -219,13 +225,20 @@
                         <span data-i18n="active_zones_title">Hot Geographic Zones (Active Contractor Prospects)</span>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        {% for zone, count in top_zones %}
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-medium text-slate-200">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                            <span>🇺🇸 {{ zone }}</span>
-                            <span class="bg-slate-800 text-cyan-400 font-mono px-2 py-0.5 rounded-md text-[11px] font-bold">{{ count }} hits</span>
-                        </div>
-                        {% endfor %}
+                        {% if top_zones %}
+                            {% for zone, count in top_zones %}
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-medium text-slate-200">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span>🇺🇸 {{ zone }}</span>
+                                <span class="bg-slate-800 text-cyan-400 font-mono px-2 py-0.5 rounded-md text-[11px] font-bold">{{ count }} hits</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-xs text-slate-500 italic py-1 flex items-center gap-2">
+                                <i class="fa-solid fa-radar text-slate-600"></i>
+                                <span data-i18n="empty_zones">No visitor hits recorded yet. Real traffic will appear here automatically as prospects click the email demo link.</span>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -244,75 +257,91 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800 text-sm">
-                        {% for v in visitors %}
-                        <tr class="hover:bg-slate-800/40 transition">
-                            <td class="py-3.5 px-6">
-                                {% if v.is_live %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
-                                </span>
-                                {% else %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-[11px]">
-                                    <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Visited
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <div class="font-bold text-white flex items-center gap-2">
-                                    <span>🇺🇸 {{ v.city }}, {{ v.region }}</span>
-                                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">{{ v.country_code }}</span>
-                                </div>
-                                <div class="text-[11px] font-mono text-slate-500 mt-0.5">{{ v.ip_address }}</div>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <span class="inline-block font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-cyan-950/40 text-cyan-300 border border-cyan-800/50">
-                                    {{ v.page_visited }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <div class="text-xs text-slate-300 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-bullhorn text-amber-400 text-xs"></i>
-                                    <span>{{ v.referrer }}</span>
-                                </div>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <div class="text-xs text-slate-300">{{ v.device_type }}</div>
-                                <div class="text-[11px] text-slate-500">{{ v.browser }}</div>
-                            </td>
-                            <td class="py-3.5 px-6 text-right font-mono text-xs text-slate-400">
-                                {{ v.visited_at.strftime('%H:%M:%S UTC') if v.visited_at else 'Just now' }}
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        {% if visitors %}
+                            {% for v in visitors %}
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="py-3.5 px-6">
+                                    {% if v.is_live %}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-[11px]">
+                                        <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Visited
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <div class="font-bold text-white flex items-center gap-2">
+                                        <span>🇺🇸 {{ v.city }}, {{ v.region }}</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">{{ v.country_code }}</span>
+                                    </div>
+                                    <div class="text-[11px] font-mono text-slate-500 mt-0.5">{{ v.ip_address }}</div>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <span class="inline-block font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-cyan-950/40 text-cyan-300 border border-cyan-800/50">
+                                        {{ v.page_visited }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <div class="text-xs text-slate-300 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bullhorn text-amber-400 text-xs"></i>
+                                        <span>{{ v.referrer }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <div class="text-xs text-slate-300">{{ v.device_type }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ v.browser }}</div>
+                                </td>
+                                <td class="py-3.5 px-6 text-right font-mono text-xs text-slate-400">
+                                    {{ v.visited_at.strftime('%H:%M:%S UTC') if v.visited_at else 'Just now' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="py-12 text-center text-slate-500">
+                                    <i class="fa-solid fa-earth-americas text-3xl mb-2 text-slate-600 block"></i>
+                                    <span class="text-xs" data-i18n="empty_visitors">0 visitor hits recorded yet. Real traffic will appear here automatically as prospects click the email demo link.</span>
+                                </td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
 
             <!-- Mobile View for Live Visitors -->
             <div class="md:hidden divide-y divide-slate-800 p-4 space-y-3">
-                {% for v in visitors %}
-                <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-2">
-                    <div class="flex items-center justify-between">
-                        <div class="font-bold text-white text-sm flex items-center gap-2">
-                            <span>🇺🇸 {{ v.city }}, {{ v.region }}</span>
+                {% if visitors %}
+                    {% for v in visitors %}
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="font-bold text-white text-sm flex items-center gap-2">
+                                <span>🇺🇸 {{ v.city }}, {{ v.region }}</span>
+                            </div>
+                            {% if v.is_live %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
+                            </span>
+                            {% else %}
+                            <span class="text-[10px] text-slate-500">Visited</span>
+                            {% endif %}
                         </div>
-                        {% if v.is_live %}
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
-                        </span>
-                        {% else %}
-                        <span class="text-[10px] text-slate-500">Visited</span>
-                        {% endif %}
+                        <div class="text-xs text-slate-400 flex items-center justify-between font-mono">
+                            <span class="text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800/40">{{ v.page_visited }}</span>
+                            <span class="text-slate-500">{{ v.visited_at.strftime('%H:%M') if v.visited_at else 'Recent' }}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-400 truncate">
+                            <i class="fa-solid fa-bullhorn text-amber-400 mr-1"></i> {{ v.referrer }}
+                        </div>
                     </div>
-                    <div class="text-xs text-slate-400 flex items-center justify-between font-mono">
-                        <span class="text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800/40">{{ v.page_visited }}</span>
-                        <span class="text-slate-500">{{ v.visited_at.strftime('%H:%M') if v.visited_at else 'Recent' }}</span>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        <i class="fa-solid fa-radar text-2xl text-slate-600 block mb-1"></i>
+                        <span data-i18n="empty_visitors">0 visitor hits recorded yet.</span>
                     </div>
-                    <div class="text-[11px] text-slate-400 truncate">
-                        <i class="fa-solid fa-bullhorn text-amber-400 mr-1"></i> {{ v.referrer }}
-                    </div>
-                </div>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
 
@@ -349,7 +378,7 @@
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
                         <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="store_total_subscribers">Total Subscribed Clients</div>
                         <div class="text-2xl font-black text-white mt-1">{{ total_subscribers }} <span class="text-xs text-slate-400 font-normal">contractors</span></div>
-                        <div class="text-[11px] text-emerald-400 font-medium mt-1">100% Retention Rate</div>
+                        <div class="text-[11px] text-emerald-400 font-medium mt-1">100% Real Live Metrics</div>
                     </div>
 
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
@@ -385,87 +414,103 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800 text-sm">
-                        {% for o in subscription_orders %}
-                        <tr class="hover:bg-slate-800/40 transition">
-                            <td class="py-3.5 px-6 font-mono text-xs text-amber-400 font-bold">
-                                {{ o.order_number }}
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <div class="font-bold text-white">{{ o.company_name }}</div>
-                                <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                                    <span><i class="fa-solid fa-user-check text-slate-500"></i> {{ o.customer_name }}</span>
-                                    <span>•</span>
-                                    <span class="font-mono text-slate-400">{{ o.customer_email }}</span>
-                                </div>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <span class="text-xs font-semibold text-slate-300">
-                                    🇺🇸 {{ o.city }}, {{ o.state }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/50 text-emerald-300 border border-emerald-800/50">
-                                    {{ o.plan_name }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6 font-mono font-bold text-white">
-                                ${{ "{:,.2f}".format(o.amount_usd) }}
-                                <span class="text-[10px] text-slate-500 font-normal">/mo</span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <div class="text-xs text-slate-300 font-mono flex items-center gap-1.5">
-                                    <i class="fa-solid fa-shield-halved text-emerald-400 text-xs"></i>
-                                    <span>{{ o.payment_method }}</span>
-                                </div>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                {% if o.status == 'ACTIVE' %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold">
-                                    <i class="fa-solid fa-check"></i> ACTIVE
-                                </span>
-                                {% else %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold">
-                                    <i class="fa-solid fa-hourglass-half"></i> TRIALING
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="py-3.5 px-6 text-right font-mono text-xs text-slate-400">
-                                {{ o.next_billing_date.strftime('%Y-%m-%d') if o.next_billing_date else 'In 14 days' }}
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        {% if subscription_orders %}
+                            {% for o in subscription_orders %}
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="py-3.5 px-6 font-mono text-xs text-amber-400 font-bold">
+                                    {{ o.order_number }}
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <div class="font-bold text-white">{{ o.company_name }}</div>
+                                    <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                                        <span><i class="fa-solid fa-user-check text-slate-500"></i> {{ o.customer_name }}</span>
+                                        <span>•</span>
+                                        <span class="font-mono text-slate-400">{{ o.customer_email }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <span class="text-xs font-semibold text-slate-300">
+                                        🇺🇸 {{ o.city }}, {{ o.state }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/50 text-emerald-300 border border-emerald-800/50">
+                                        {{ o.plan_name }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-6 font-mono font-bold text-white">
+                                    ${{ "{:,.2f}".format(o.amount_usd) }}
+                                    <span class="text-[10px] text-slate-500 font-normal">/mo</span>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    <div class="text-xs text-slate-300 font-mono flex items-center gap-1.5">
+                                        <i class="fa-solid fa-shield-halved text-emerald-400 text-xs"></i>
+                                        <span>{{ o.payment_method }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    {% if o.status == 'ACTIVE' %}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold">
+                                        <i class="fa-solid fa-check"></i> ACTIVE
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold">
+                                        <i class="fa-solid fa-hourglass-half"></i> TRIALING
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-6 text-right font-mono text-xs text-slate-400">
+                                    {{ o.next_billing_date.strftime('%Y-%m-%d') if o.next_billing_date else 'In 14 days' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="py-12 text-center text-slate-500">
+                                    <i class="fa-solid fa-cart-shopping text-3xl mb-2 text-slate-600 block"></i>
+                                    <span class="text-xs" data-i18n="empty_orders">0 active subscriptions in store. New US contractor subscriptions and direct deposits to Lead Bank will appear here automatically.</span>
+                                </td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
 
             <!-- Mobile View for Store Orders -->
             <div class="md:hidden divide-y divide-slate-800 p-4 space-y-3">
-                {% for o in subscription_orders %}
-                <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="font-bold text-white text-base">{{ o.company_name }}</div>
-                            <div class="text-xs text-slate-400 mt-0.5">{{ o.customer_name }} • 🇺🇸 {{ o.city }}, {{ o.state }}</div>
+                {% if subscription_orders %}
+                    {% for o in subscription_orders %}
+                    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="font-bold text-white text-base">{{ o.company_name }}</div>
+                                <div class="text-xs text-slate-400 mt-0.5">{{ o.customer_name }} • 🇺🇸 {{ o.city }}, {{ o.state }}</div>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+                                ${{ "{:,.2f}".format(o.amount_usd) }}/mo
+                            </span>
                         </div>
-                        <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
-                            ${{ "{:,.2f}".format(o.amount_usd) }}/mo
-                        </span>
-                    </div>
 
-                    <div class="text-xs text-slate-300 flex items-center justify-between pt-1 border-t border-slate-900">
-                        <span class="text-amber-400 font-mono">{{ o.order_number }}</span>
-                        {% if o.status == 'ACTIVE' %}
-                        <span class="text-emerald-400 font-bold">● ACTIVE</span>
-                        {% else %}
-                        <span class="text-amber-400 font-bold">● TRIALING</span>
-                        {% endif %}
-                    </div>
+                        <div class="text-xs text-slate-300 flex items-center justify-between pt-1 border-t border-slate-900">
+                            <span class="text-amber-400 font-mono">{{ o.order_number }}</span>
+                            {% if o.status == 'ACTIVE' %}
+                            <span class="text-emerald-400 font-bold">● ACTIVE</span>
+                            {% else %}
+                            <span class="text-amber-400 font-bold">● TRIALING</span>
+                            {% endif %}
+                        </div>
 
-                    <div class="text-[11px] text-slate-400 font-mono bg-slate-900/60 p-2 rounded-lg">
-                        <i class="fa-solid fa-building-columns text-emerald-400 mr-1"></i> {{ o.payment_method }}
+                        <div class="text-[11px] text-slate-400 font-mono bg-slate-900/60 p-2 rounded-lg">
+                            <i class="fa-solid fa-building-columns text-emerald-400 mr-1"></i> {{ o.payment_method }}
+                        </div>
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        <i class="fa-solid fa-store text-2xl text-slate-600 block mb-1"></i>
+                        <span data-i18n="empty_orders">0 active subscriptions in store. Awaiting first paid order.</span>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -588,6 +633,7 @@
                 btn_founder_logout: "Lock Portal",
                 mrr_badge: "Monthly Recurring Revenue (MRR)",
                 arr_projection: "Annual Run-Rate (ARR) projected:",
+                awaiting_first_sub: "Awaiting first live subscriber",
                 btn_contractor_demo: "Open Contractor Portal",
                 btn_add_client: "Add US Contractor",
                 kpi_subscribers: "Paying Subscribers",
@@ -608,6 +654,8 @@
                 stat_texas_share: "Texas (TX)",
                 stat_arizona_share: "Arizona (AZ)",
                 active_zones_title: "Hot Geographic Zones (Active Contractor Prospects)",
+                empty_zones: "No visitor hits detected yet. Real traffic will appear here automatically as prospects click the email demo link.",
+                empty_visitors: "0 visitor hits recorded yet. Real traffic will appear here automatically as prospects click the email demo link.",
                 col_pulse: "Pulse",
                 col_page: "Target Page",
                 col_campaign: "Campaign Source",
@@ -621,6 +669,7 @@
                 store_total_subscribers: "Total Subscribed Clients",
                 store_mrr: "Boutique MRR Received",
                 store_payout_target: "Payout US Bank",
+                empty_orders: "0 active subscriptions in store. New US contractor subscriptions and direct deposits to Lead Bank will appear here automatically.",
                 col_order_id: "Order #",
                 col_customer_company: "Customer & Company",
                 col_zone: "Zone / City",
@@ -651,6 +700,7 @@
                 btn_founder_logout: "Verrouiller le Portail",
                 mrr_badge: "Revenus Récurrents Mensuels (MRR)",
                 arr_projection: "Projection Annuelle (ARR) :",
+                awaiting_first_sub: "En attente du premier abonné réel",
                 btn_contractor_demo: "Ouvrir le Portail Artisan",
                 btn_add_client: "Ajouter un Artisan US",
                 kpi_subscribers: "Abonnés Payants",
@@ -671,6 +721,8 @@
                 stat_texas_share: "Texas (TX)",
                 stat_arizona_share: "Arizona (AZ)",
                 active_zones_title: "Zones Géographiques Actives (Prospects Artisans US)",
+                empty_zones: "Aucun visiteur détecté pour l'instant. En attente des premiers clics des campagnes d'emailing...",
+                empty_visitors: "0 visite enregistrée pour l'instant. Le trafic réel s'affichera ici dès qu'un prospect cliquera sur le lien de démo.",
                 col_pulse: "Signal",
                 col_page: "Page Consultée",
                 col_campaign: "Campagne Source",
@@ -684,6 +736,7 @@
                 store_total_subscribers: "Clients Abonnés Boutique",
                 store_mrr: "MRR Boutique Encaissé",
                 store_payout_target: "Compte Bancaire US (Versement)",
+                empty_orders: "0 abonnement actif pour le moment. Les souscriptions réelles des artisans et les encaissements Lead Bank apparaîtront ici automatiquement dès le premier paiement.",
                 col_order_id: "N° Commande",
                 col_customer_company: "Client & Entreprise",
                 col_zone: "Zone / Ville",
