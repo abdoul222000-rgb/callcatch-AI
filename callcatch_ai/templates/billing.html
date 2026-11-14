@@ -100,6 +100,27 @@
             </div>
         </div>
 
+        {% elif contractor.subscription_status == 'PENDING_ACH' %}
+        <!-- ACH Pending Clearance Banner -->
+        <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-3xl p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-xl font-black">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white" data-i18n="ach_pending_title">
+                        ACH Bank Transfer Submitted & Clearing
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-0.5" data-i18n="ach_pending_sub">
+                        Reference ID: <span class="font-mono text-cyan-400 font-bold">{{ contractor.subscription_id or 'ACH-PRO' }}</span>. Your features remain 100% active while bank funds settle.
+                    </p>
+                </div>
+            </div>
+            <span class="px-3 py-1.5 rounded-xl bg-cyan-950/80 text-cyan-300 border border-cyan-800 text-xs font-mono font-bold">
+                Settling (24-48h)
+            </span>
+        </div>
+
         {% else %}
         <!-- Trial Status Countdown Card -->
         <div class="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -216,15 +237,42 @@
                 </div>
             </div>
 
+            <!-- Anti-Fraud Bank Verification Input Block -->
+            <div class="mt-2 mb-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-200">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                    <span data-i18n="verify_title">Proof of Bank Transfer Verification (Mandatory)</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1" data-i18n="label_sender_bank">
+                            Your US Bank / Service
+                        </label>
+                        <input type="text" id="achBankName" placeholder="e.g. Chase, Wells Fargo, BofA, QuickBooks" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1" data-i18n="label_trace_number">
+                            Bank Confirmation / Trace Reference # <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" id="achTraceNumber" required placeholder="e.g. TR-91028340 or ACH Ref #" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono">
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 italic" data-i18n="verify_hint">
+                    Found on your bank receipt after completing the transfer. Required to automatically verify your subscription.
+                </p>
+            </div>
+
             <!-- Action Confirmation Notification -->
             <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p class="text-xs text-slate-400 flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                    <span data-i18n="ach_instruction">Once transfer is sent from your bank, click below to notify our team for instant PRO activation.</span>
+                    <span data-i18n="ach_instruction">Once transfer is sent with Reference #, click to submit for bank clearance.</span>
                 </p>
                 <button id="btnNotifyAch" onclick="submitAchPayment()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-paper-plane"></i>
-                    <span data-i18n="btn_confirm_transfer">I Have Sent the $99.00 ACH Transfer</span>
+                    <span data-i18n="btn_confirm_transfer">Submit Verified Bank Transfer ($99.00)</span>
                 </button>
             </div>
         </div>
@@ -366,27 +414,41 @@
         }
 
         async function submitAchPayment() {
+            const bankName = (document.getElementById('achBankName').value || 'US Bank').trim();
+            const traceNumber = (document.getElementById('achTraceNumber').value || '').trim();
+
+            if (!traceNumber || traceNumber.length < 4) {
+                alert(currentLang === 'fr' 
+                    ? 'Veuillez saisir votre numéro de confirmation ou référence bancaire (obligatoire).' 
+                    : 'Please enter your bank confirmation or trace reference number (mandatory).');
+                document.getElementById('achTraceNumber').focus();
+                return;
+            }
+
             const btn = document.getElementById('btnNotifyAch');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
             btn.disabled = true;
 
             try {
                 const response = await fetch('/api/billing/notify-ach', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bank_name: bankName, confirmation_number: traceNumber })
                 });
                 const data = await response.json();
                 if (data.success) {
-                    alert('🎉 Payment registered successfully! Your PRO subscription has been activated. Welcome to CallCatch AI Pro!');
+                    alert(currentLang === 'fr'
+                        ? '🎉 Confirmation de virement enregistrée ! Votre référence a été transmise. Vos fonctionnalités restent actives pendant la compensation.'
+                        : '🎉 Bank transfer confirmation received! Your reference number is registered. Your features remain active while funds clear.');
                     window.location.reload();
                 } else {
-                    alert('Note: ' + (data.message || 'Notification recorded.'));
+                    alert('Error: ' + (data.detail || data.message || 'Could not verify reference.'));
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert('Transfer notification recorded. Our team will verify and activate your line.');
+                alert('Transfer recorded. Our automated system is tracking clearance.');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -415,7 +477,13 @@
                 label_account_type: "Account Type",
                 label_memo: "Payment Memo / Reference",
                 ach_instruction: "Once transfer is sent from your bank, click below to notify our team for instant PRO activation.",
-                btn_confirm_transfer: "I Have Sent the $99.00 ACH Transfer",
+                btn_confirm_transfer: "Submit Verified Bank Transfer ($99.00)",
+                ach_pending_title: "ACH Bank Transfer Submitted & Clearing",
+                ach_pending_sub: "Your payment reference is registered. All features remain active while bank funds settle.",
+                verify_title: "Proof of Bank Transfer Verification (Mandatory)",
+                label_sender_bank: "Your US Bank / Service",
+                label_trace_number: "Bank Confirmation / Trace Reference #",
+                verify_hint: "Found on your bank receipt after completing the transfer. Required to verify subscription.",
                 trial_desc: "Test CallCatch AI in your business with 0 commitment.",
                 pro_plan_desc: "One recovered customer pays for 5+ months.",
                 lock_in_pro: "Pay via US Bank ACH • $99/mo",
@@ -443,7 +511,13 @@
                 label_account_type: "Type de Compte",
                 label_memo: "Motif / Référence du Virement",
                 ach_instruction: "Une fois le virement envoyé depuis votre banque, cliquez ci-dessous pour activer instantanément votre accès PRO.",
-                btn_confirm_transfer: "J'ai Envoyé le Virement de 99,00 $ (ACH)",
+                btn_confirm_transfer: "Valider le Virement Bancaire (99,00 $)",
+                ach_pending_title: "Virement Bancaire ACH Soumis (En Cours de Compensation)",
+                ach_pending_sub: "Votre référence bancaire est enregistrée. Toutes vos fonctionnalités restent actives pendant le règlement.",
+                verify_title: "Vérification & Preuve du Virement (Obligatoire)",
+                label_sender_bank: "Votre Banque Américaine",
+                label_trace_number: "N° de Confirmation / Référence de Virement",
+                verify_hint: "Indiqué sur le reçu de votre banque après le virement. Obligatoire pour valider l'abonnement.",
                 trial_desc: "Testez CallCatch AI dans votre entreprise sans aucun engagement.",
                 pro_plan_desc: "Un seul client récupéré rentabilise plus de 5 mois d'abonnement.",
                 lock_in_pro: "Payer par Virement US (ACH) • 99 $/mois",

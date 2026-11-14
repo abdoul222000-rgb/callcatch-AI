@@ -380,29 +380,37 @@ def founder_activate_pro(
     authorized: bool = Depends(get_current_founder),
     db: Session = Depends(get_db)
 ):
-    """Permet au Fondateur de valider manuellement l'abonnement PRO ($99/mo) après réception du virement sur Grey"""
+    """Valide définitivement l'abonnement PRO ($99/mo) après confirmation du virement sur Grey"""
     contractor = db.query(Contractor).filter(Contractor.id == contractor_id).first()
     if contractor:
         contractor.subscription_status = "ACTIVE"
         contractor.subscription_active = True
         contractor.monthly_plan_price = 99.0
         
-        order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-        new_order = SubscriptionOrder(
-            order_number=order_num,
-            customer_name=contractor.owner_name,
-            customer_email=contractor.email,
-            company_name=contractor.business_name,
-            city="US Client",
-            state="US",
-            plan_name="Pro Auto-Catch ($99/mo)",
-            amount_usd=99.0,
-            status="ACTIVE",
-            payment_method="Lead Bank (Direct ACH ••••9479)",
-            next_billing_date=datetime.utcnow() + timedelta(days=30),
-            created_at=datetime.utcnow()
-        )
-        db.add(new_order)
+        pending_order = db.query(SubscriptionOrder).filter(
+            SubscriptionOrder.customer_email == contractor.email,
+            SubscriptionOrder.status == "PENDING_VERIFICATION"
+        ).order_by(SubscriptionOrder.created_at.desc()).first()
+        
+        if pending_order:
+            pending_order.status = "ACTIVE"
+        else:
+            order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+            new_order = SubscriptionOrder(
+                order_number=order_num,
+                customer_name=contractor.owner_name,
+                customer_email=contractor.email,
+                company_name=contractor.business_name,
+                city="US Client",
+                state="US",
+                plan_name="Pro Auto-Catch ($99/mo)",
+                amount_usd=99.0,
+                status="ACTIVE",
+                payment_method="Lead Bank (Direct ACH ••••9479)",
+                next_billing_date=datetime.utcnow() + timedelta(days=30),
+                created_at=datetime.utcnow()
+            )
+            db.add(new_order)
         db.commit()
     return RedirectResponse(url="/founder", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -521,11 +529,23 @@ def billing_page(
 
 
 @app.post("/api/billing/notify-ach")
-def notify_ach_transfer(
+async def notify_ach_transfer(
+    request: Request,
     current_contractor: Contractor = Depends(get_current_contractor),
     db: Session = Depends(get_db)
 ):
-    """Enregistre la soumission d'un virement ACH Direct Lead Bank par l'artisan"""
+    """Enregistre la soumission d'un virement ACH avec numéro de trace bancaire obligatoire pour vérification anti-fraude"""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+        
+    bank_name = (body.get("bank_name") or "US Bank").strip()
+    trace_number = (body.get("confirmation_number") or "").strip()
+    
+    if not trace_number or len(trace_number) < 4:
+        raise HTTPException(status_code=400, detail="Numéro de confirmation/référence bancaire obligatoire (min 4 caractères).")
+        
     order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
     new_order = SubscriptionOrder(
         order_number=order_num,
@@ -536,17 +556,26 @@ def notify_ach_transfer(
         state="US",
         plan_name="Pro Auto-Catch ($99/mo)",
         amount_usd=99.0,
-        status="ACTIVE",
-        payment_method="Lead Bank (Direct ACH ••••9479)",
+        status="PENDING_VERIFICATION",
+        payment_method=f"Lead Bank ACH ({bank_name} Ref: {trace_number})",
         next_billing_date=datetime.utcnow() + timedelta(days=30),
         created_at=datetime.utcnow()
     )
-    current_contractor.subscription_status = "ACTIVE"
-    current_contractor.subscription_active = True
-    current_contractor.monthly_plan_price = 99.0
+    
+    # Marquer l'artisan en attente de compensation tout en lui maintenant son essai gratuit actif sans coupure
+    current_contractor.subscription_status = "PENDING_ACH"
+    current_contractor.subscription_id = f"ach_{trace_number}"
+    if not current_contractor.trial_ends_at or current_contractor.trial_ends_at < datetime.utcnow():
+        current_contractor.trial_ends_at = datetime.utcnow() + timedelta(days=7)
+        
     db.add(new_order)
     db.commit()
-    return {"success": True, "order_number": order_num, "message": "Paiement ACH enregistré. Plan PRO activé avec succès."}
+    return {
+        "success": True, 
+        "order_number": order_num,
+        "status": "PENDING_VERIFICATION",
+        "message": f"Preuve de virement enregistrée (Réf: {trace_number}). En cours de compensation."
+    }
 
 
 @app.post("/api/demo/simulate-upgrade")
