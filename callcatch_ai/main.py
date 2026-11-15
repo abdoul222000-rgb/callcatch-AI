@@ -84,17 +84,32 @@ def record_visitor_hit(request: Request, db: Session, page: str = "/"):
         device = "Mobile (iPhone)" if "iPhone" in user_agent else ("Mobile (Android)" if "Android" in user_agent else "Desktop")
         browser = "Safari" if "Safari" in user_agent and "Chrome" not in user_agent else ("Chrome" if "Chrome" in user_agent else "Browser")
         
-        city = cf_city or ("Tampa" if "iPhone" in user_agent else "Dallas")
-        region = cf_region or ("FL" if city == "Tampa" else "TX")
+        cf_c_upper = (cf_country or "US").upper()
+        if cf_c_upper == "BE":
+            city = cf_city or "Bruxelles"
+            region = cf_region or "Bruxelles"
+            country_name = "Belgique"
+        elif cf_c_upper == "CH":
+            city = cf_city or "Genève"
+            region = cf_region or "Genève"
+            country_name = "Suisse"
+        elif cf_c_upper == "FR":
+            city = cf_city or "Paris"
+            region = cf_region or "IDF"
+            country_name = "France"
+        else:
+            city = cf_city or ("Tampa" if "iPhone" in user_agent else "Dallas")
+            region = cf_region or ("FL" if city == "Tampa" else "TX")
+            country_name = "United States"
         
         visitor = SiteVisitor(
             ip_address=ip,
             city=city,
             region=region,
-            country="United States" if cf_country in ["US", ""] else cf_country,
-            country_code=cf_country or "US",
+            country=country_name,
+            country_code=cf_c_upper,
             page_visited=page,
-            referrer=request.headers.get("referer", "Cold Email Campaign Link"),
+            referrer=request.headers.get("referer", "Campaign Link"),
             device_type=device,
             browser=browser,
             is_live=True
@@ -185,6 +200,7 @@ def register_submit(
     owner_phone: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    country: str = Form("US"),
     avg_ticket_usd: float = Form(450.0),
     db: Session = Depends(get_db)
 ):
@@ -197,9 +213,36 @@ def register_submit(
             "error": "Cet email est déjà utilisé / This email is already registered."
         })
 
-    # Numéro virtuel Twilio attribué
-    area_codes = [512, 305, 415, 214, 702, 602]
-    assigned_twilio = f"+1 ({random.choice(area_codes)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}"
+    country_clean = (country or "US").upper().strip()
+    if country_clean not in ["US", "BE", "CH", "FR"]:
+        country_clean = "US"
+
+    if country_clean in ["BE", "FR"]:
+        currency = "EUR"
+        default_ticket = 350.0
+    elif country_clean == "CH":
+        currency = "CHF"
+        default_ticket = 450.0
+    else:
+        currency = "USD"
+        default_ticket = 450.0
+
+    final_ticket = avg_ticket_usd if (avg_ticket_usd and avg_ticket_usd > 0) else default_ticket
+
+    # Numéro virtuel assigné selon le pays
+    if country_clean == "BE":
+        assigned_twilio = f"+32 460 {random.randint(10, 99)} {random.randint(10, 99)} {random.randint(10, 99)}"
+        default_missed_text = f"Bonjour ! C'est {owner_name.strip()} de {business_name.strip()}. Navré d'avoir manqué votre appel, je suis actuellement en pleine intervention. Comment puis-je vous aider dès maintenant ?"
+    elif country_clean == "CH":
+        assigned_twilio = f"+41 76 {random.randint(100, 999)} {random.randint(10, 99)} {random.randint(10, 99)}"
+        default_missed_text = f"Bonjour ! C'est {owner_name.strip()} de {business_name.strip()}. Navré d'avoir manqué votre appel, je suis en intervention. Comment puis-je vous aider ?"
+    elif country_clean == "FR":
+        assigned_twilio = f"+33 6 {random.randint(10, 99)} {random.randint(10, 99)} {random.randint(10, 99)} {random.randint(10, 99)}"
+        default_missed_text = f"Bonjour ! C'est {owner_name.strip()} de {business_name.strip()}. Navré d'avoir manqué votre appel, je suis actuellement en intervention. Comment puis-je vous aider dès maintenant ?"
+    else:
+        area_codes = [512, 305, 415, 214, 702, 602]
+        assigned_twilio = f"+1 ({random.choice(area_codes)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}"
+        default_missed_text = f"Hey! This is {owner_name.strip()} with {business_name.strip()}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
 
     new_contractor = Contractor(
         email=cleaned_email,
@@ -209,11 +252,13 @@ def register_submit(
         owner_phone=owner_phone.strip(),
         business_type=business_type.strip(),
         twilio_phone_number=assigned_twilio,
-        avg_ticket_usd=avg_ticket_usd,
+        country=country_clean,
+        currency=currency,
+        avg_ticket_usd=final_ticket,
         monthly_plan_price=99.0,
         subscription_status="TRIAL",
         trial_ends_at=datetime.utcnow() + timedelta(days=14),
-        custom_missed_text=f"Hey! This is {owner_name.strip()} with {business_name.strip()}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
+        custom_missed_text=default_missed_text
     )
     db.add(new_contractor)
     db.commit()
@@ -325,14 +370,20 @@ def founder_dashboard(
         geo_counts[key] = geo_counts.get(key, 0) + 1
     top_zones = sorted(geo_counts.items(), key=lambda x: x[1], reverse=True)[:6]
 
-    # Pourcentages par état US
+    # Pourcentages par pays / état
     fl_count = len([v for v in visitors if v.region == "FL"])
     tx_count = len([v for v in visitors if v.region == "TX"])
     az_count = len([v for v in visitors if v.region == "AZ"])
+    be_count = len([v for v in visitors if getattr(v, 'country_code', 'US') == "BE"])
+    ch_count = len([v for v in visitors if getattr(v, 'country_code', 'US') == "CH"])
+    us_count = len([v for v in visitors if getattr(v, 'country_code', 'US') in ["US", ""]])
 
     fl_pct = round((fl_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
     tx_pct = round((tx_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
     az_pct = round((az_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
+    be_pct = round((be_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
+    ch_pct = round((ch_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
+    us_pct = round((us_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
 
     return templates.TemplateResponse(request=request, name="founder/dashboard.html", context={
         "contractors": contractors,
@@ -352,6 +403,12 @@ def founder_dashboard(
         "fl_pct": fl_pct,
         "tx_pct": tx_pct,
         "az_pct": az_pct,
+        "be_pct": be_pct,
+        "ch_pct": ch_pct,
+        "us_pct": us_pct,
+        "be_count": be_count,
+        "ch_count": ch_count,
+        "us_count": us_count,
         "lead_bank_routing": settings.LEAD_BANK_ROUTING,
         "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4
     })
@@ -546,18 +603,24 @@ async def notify_ach_transfer(
     if not trace_number or len(trace_number) < 4:
         raise HTTPException(status_code=400, detail="Numéro de confirmation/référence bancaire obligatoire (min 4 caractères).")
         
-    order_num = f"ORD-ACH-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    order_num = f"ORD-WIRE-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    country_code = current_contractor.country or "US"
+    currency_code = current_contractor.currency or "USD"
+    symbol = current_contractor.currency_symbol
+    city_default = "Bruxelles" if country_code == "BE" else ("Genève" if country_code == "CH" else "US Client")
+    
     new_order = SubscriptionOrder(
         order_number=order_num,
         customer_name=current_contractor.owner_name,
         customer_email=current_contractor.email,
         company_name=current_contractor.business_name,
-        city="US Client",
-        state="US",
-        plan_name="Pro Auto-Catch ($99/mo)",
-        amount_usd=99.0,
+        city=city_default,
+        state=country_code,
+        plan_name=f"Pro Auto-Catch ({current_contractor.formatted_plan_price})",
+        amount_usd=current_contractor.monthly_plan_price,
+        currency=currency_code,
         status="PENDING_VERIFICATION",
-        payment_method=f"Lead Bank ACH ({bank_name} Ref: {trace_number})",
+        payment_method=f"Virement Bancaire / Wire ({bank_name} Réf: {trace_number})",
         next_billing_date=datetime.utcnow() + timedelta(days=30),
         created_at=datetime.utcnow()
     )
@@ -754,19 +817,67 @@ async def simulate_missed_call(
     current_contractor: Contractor = Depends(get_current_contractor),
     db: Session = Depends(get_db)
 ):
-    first_names = ["Sarah", "David", "Jessica", "Robert", "Emily", "Michael", "Brandon", "Ashley"]
-    last_names = ["Miller", "Johnson", "Davis", "Wilson", "Taylor", "Anderson", "Thomas", "Jackson"]
-    caller_name = f"{random.choice(first_names)} {random.choice(last_names)}"
-    caller_phone = f"+1 (512) {random.randint(200, 999)}-{random.randint(1000, 9999)}"
+    country = (current_contractor.country or "US").upper()
+
+    if country == "BE":
+        # Simulation Belgique (Bruxelles, Liège, Namur, Charleroi)
+        first_names = ["Sophie", "Marc", "Julien", "Lucas", "Amélie", "Thomas", "Camille", "Nicolas"]
+        last_names = ["Vandamme", "Dupont", "Lambert", "De Smet", "Peeters", "Wouters", "Janssens", "Dubois"]
+        caller_name = f"{random.choice(first_names)} {random.choice(last_names)}"
+        caller_phone = f"+32 47{random.randint(0, 9)} {random.randint(10, 99)} {random.randint(10, 99)} {random.randint(10, 99)}"
+        streets = [
+            "Avenue Louise, Bruxelles", "Rue de la Station, Liège", "Chaussée de Waterloo, Ixelles", 
+            "Boulevard Tirou, Charleroi", "Rue de Fer, Namur", "Grand-Place, Mons"
+        ]
+        address = f"{random.randint(5, 180)} {random.choice(streets)}"
+        summary = "Dépannage plomberie / chauffage urgent à domicile (Belgique)"
+        
+        msg1_body = f"Bonjour ! C'est {current_contractor.owner_name} de {current_contractor.business_name}. Navré d'avoir manqué votre appel, je suis en intervention. Comment puis-je vous aider dès maintenant ?"
+        msg2_body = f"Bonjour {current_contractor.owner_name} ! J'ai une grosse fuite d'eau urgente dans ma cuisine. Pouvez-vous intervenir aujourd'hui ? Mon adresse est le {address}."
+        msg3_body = f"Bien reçu {caller_name.split()[0]} ! C'est noté pour l'urgence. Nous pouvons passer aujourd'hui vers 14h30. Est-ce que cette heure vous convient ?"
+        msg4_body = "Oui parfait pour 14h30, un grand merci pour votre réactivité ultra rapide !"
+
+    elif country == "CH":
+        # Simulation Suisse (Genève, Lausanne, Neuchâtel, Fribourg)
+        first_names = ["Alexandre", "Camille", "Nicolas", "Elena", "Mathieu", "Céline", "Romain", "Laure"]
+        last_names = ["Favre", "Rossi", "Rochat", "Meyer", "Bonvin", "Blanc", "Perrin", "Girard"]
+        caller_name = f"{random.choice(first_names)} {random.choice(last_names)}"
+        caller_phone = f"+41 7{random.choice([6, 8, 9])} {random.randint(100, 999)} {random.randint(10, 99)} {random.randint(10, 99)}"
+        streets = [
+            "Rue du Rhône, Genève", "Avenue de la Gare, Lausanne", "Chemin du Crêt, Neuchâtel", 
+            "Rue de Romont, Fribourg", "Avenue du Midi, Sion"
+        ]
+        address = f"{random.randint(5, 120)} {random.choice(streets)}"
+        summary = "Dépannage d'urgence plomberie / électricité en Suisse Romande"
+        
+        msg1_body = f"Bonjour ! C'est {current_contractor.owner_name} de {current_contractor.business_name}. Navré d'avoir manqué votre appel, je suis en intervention. Comment puis-je vous aider ?"
+        msg2_body = f"Bonjour {current_contractor.owner_name} ! Panne de chaudière et fuite d'eau à mon domicile. Est-ce possible d'intervenir en urgence aujourd'hui ? Mon adresse est {address}."
+        msg3_body = f"Bien reçu {caller_name.split()[0]} ! Priorité accordée à votre dépannage. Un créneau est libre à 14h00. Est-ce que ce créneau vous convient ?"
+        msg4_body = "Oui 14h00 c'est idéal, merci beaucoup d'avoir répondu si vite par SMS !"
+
+    else:
+        # Simulation US (Texas, Floride, Arizona)
+        first_names = ["Sarah", "David", "Jessica", "Robert", "Emily", "Michael", "Brandon", "Ashley"]
+        last_names = ["Miller", "Johnson", "Davis", "Wilson", "Taylor", "Anderson", "Thomas", "Jackson"]
+        caller_name = f"{random.choice(first_names)} {random.choice(last_names)}"
+        caller_phone = f"+1 (512) {random.randint(200, 999)}-{random.randint(1000, 9999)}"
+        address = f"{random.randint(100, 9999)} Oak Springs Dr, Austin TX"
+        summary = "Urgent residential service requested via CallCatch AI."
+        
+        msg1_body = f"Hey! This is {current_contractor.owner_name} with {current_contractor.business_name}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
+        msg2_body = f"Hi {current_contractor.owner_name}! I have an urgent issue at my house. Can someone come by today? My address is {address}."
+        msg3_body = f"Got it {caller_name.split()[0]}! I've flagged this for {current_contractor.owner_name}. We have an opening today around 2:30 PM. Does that time work for you?"
+        msg4_body = "Yes, 2:30 PM works great! Thank you so much for getting back to me so fast!"
 
     call = MissedCall(
         contractor_id=current_contractor.id,
         caller_phone=caller_phone,
         caller_name=caller_name,
+        address=address,
         status="APPOINTMENT_BOOKED",
-        urgency_level="HIGH" if random.random() > 0.4 else "NORMAL",
+        urgency_level="HIGH" if random.random() > 0.3 else "NORMAL",
         estimated_revenue_saved=current_contractor.avg_ticket_usd,
-        job_summary="Urgent residential service requested via CallCatch AI."
+        job_summary=summary
     )
     db.add(call)
     db.commit()
@@ -777,7 +888,7 @@ async def simulate_missed_call(
         direction="OUTBOUND",
         sender=current_contractor.twilio_phone_number,
         receiver=caller_phone,
-        body=f"Hey! This is {current_contractor.owner_name} with {current_contractor.business_name}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
+        body=msg1_body
     )
     db.add(msg1)
 
@@ -786,7 +897,7 @@ async def simulate_missed_call(
         direction="INBOUND",
         sender=caller_phone,
         receiver=current_contractor.twilio_phone_number,
-        body=f"Hi {current_contractor.owner_name}! I have an urgent issue at my house. Can someone come by today? My address is {random.randint(100, 9999)} Oak Springs Dr."
+        body=msg2_body
     )
     db.add(msg2)
 
@@ -795,7 +906,7 @@ async def simulate_missed_call(
         direction="OUTBOUND",
         sender=current_contractor.twilio_phone_number,
         receiver=caller_phone,
-        body=f"Got it {caller_name.split()[0]}! I've flagged this for {current_contractor.owner_name}. We have an opening today around 2:30 PM. Does that time work for you?"
+        body=msg3_body
     )
     db.add(msg3)
 
@@ -804,9 +915,39 @@ async def simulate_missed_call(
         direction="INBOUND",
         sender=caller_phone,
         receiver=current_contractor.twilio_phone_number,
-        body="Yes, 2:30 PM works great! Thank you so much for getting back to me so fast!"
+        body=msg4_body
     )
     db.add(msg4)
     db.commit()
 
+    return RedirectResponse(url="/dashboard", status_code=303)
+
+
+@app.post("/api/contractor/update-country")
+async def update_contractor_country(
+    request: Request,
+    current_contractor: Contractor = Depends(get_current_contractor),
+    db: Session = Depends(get_db)
+):
+    """Permet à l'artisan de basculer son pays entre Belgique, Suisse et USA en 1 clic"""
+    form = await request.form()
+    selected_country = (form.get("country") or "US").upper().strip()
+    if selected_country in ["US", "BE", "CH", "FR"]:
+        current_contractor.country = selected_country
+        if selected_country in ["BE", "FR"]:
+            current_contractor.currency = "EUR"
+            current_contractor.avg_ticket_usd = 350.0
+            current_contractor.monthly_plan_price = 99.0
+            current_contractor.custom_missed_text = f"Bonjour ! C'est {current_contractor.owner_name} de {current_contractor.business_name}. Navré d'avoir manqué votre appel, je suis actuellement en pleine intervention. Comment puis-je vous aider dès maintenant ?"
+        elif selected_country == "CH":
+            current_contractor.currency = "CHF"
+            current_contractor.avg_ticket_usd = 450.0
+            current_contractor.monthly_plan_price = 99.0
+            current_contractor.custom_missed_text = f"Bonjour ! C'est {current_contractor.owner_name} de {current_contractor.business_name}. Navré d'avoir manqué votre appel, je suis en intervention. Comment puis-je vous aider ?"
+        else:
+            current_contractor.currency = "USD"
+            current_contractor.avg_ticket_usd = 450.0
+            current_contractor.monthly_plan_price = 99.0
+            current_contractor.custom_missed_text = f"Hey! This is {current_contractor.owner_name} with {current_contractor.business_name}. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
+        db.commit()
     return RedirectResponse(url="/dashboard", status_code=303)

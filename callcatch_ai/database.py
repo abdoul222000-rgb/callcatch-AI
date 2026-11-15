@@ -57,15 +57,33 @@ class Contractor(Base):
     )
     
     # Paramètres économiques et abonnement
-    avg_ticket_usd = Column(Float, default=450.0) # Gain moyen par intervention
+    country = Column(String(10), default="US") # "US", "BE", "CH", "FR"
+    currency = Column(String(10), default="USD") # "USD", "EUR", "CHF"
+    avg_ticket_usd = Column(Float, default=450.0) # Gain moyen par intervention (USD, EUR ou CHF)
     subscription_active = Column(Boolean, default=True)
-    monthly_plan_price = Column(Float, default=99.0) # 99$/mois
+    monthly_plan_price = Column(Float, default=99.0) # 99$/mois, 99€/mois ou 99 CHF/mois
     subscription_status = Column(String(30), default="TRIAL") # TRIAL, ACTIVE, CANCELLED
     trial_ends_at = Column(DateTime, nullable=True)
     subscription_id = Column(String(100), nullable=True)
     billing_email = Column(String(120), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    @property
+    def currency_symbol(self) -> str:
+        if self.currency == "EUR" or self.country in ["BE", "FR"]:
+            return "€"
+        elif self.currency == "CHF" or self.country == "CH":
+            return "CHF"
+        return "$"
+
+    @property
+    def formatted_plan_price(self) -> str:
+        if self.currency_symbol == "CHF":
+            return f"{int(self.monthly_plan_price)} CHF / mois"
+        elif self.currency_symbol == "€":
+            return f"{int(self.monthly_plan_price)} € / mois"
+        return f"${int(self.monthly_plan_price)} / mo"
 
     @property
     def is_active_pro(self) -> bool:
@@ -162,6 +180,7 @@ class SubscriptionOrder(Base):
     state = Column(String(50), default="FL")
     plan_name = Column(String(80), default="Pro Auto-Catch ($99/mo)")
     amount_usd = Column(Float, default=99.0)
+    currency = Column(String(10), default="USD") # USD, EUR, CHF
     billing_cycle = Column(String(20), default="MONTHLY")
     status = Column(String(30), default="ACTIVE") # ACTIVE, TRIALING, COMPLETED
     payment_method = Column(String(80), default="Lead Bank (Direct ACH ••••9479)")
@@ -179,7 +198,10 @@ def init_db():
                 "ALTER TABLE contractors ADD COLUMN subscription_status VARCHAR(30) DEFAULT 'TRIAL'",
                 "ALTER TABLE contractors ADD COLUMN trial_ends_at DATETIME",
                 "ALTER TABLE contractors ADD COLUMN subscription_id VARCHAR(100)",
-                "ALTER TABLE contractors ADD COLUMN billing_email VARCHAR(120)"
+                "ALTER TABLE contractors ADD COLUMN billing_email VARCHAR(120)",
+                "ALTER TABLE contractors ADD COLUMN country VARCHAR(10) DEFAULT 'US'",
+                "ALTER TABLE contractors ADD COLUMN currency VARCHAR(10) DEFAULT 'USD'",
+                "ALTER TABLE subscription_orders ADD COLUMN currency VARCHAR(10) DEFAULT 'USD'"
             ]:
                 try:
                     conn.execute(text(col_sql))

@@ -65,7 +65,7 @@
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-wider">
                             <i class="fa-solid fa-check"></i> Active PRO Plan
                         </span>
-                        <span class="text-xs text-slate-400">&bull; $99.00 / month</span>
+                        <span class="text-xs text-slate-400">&bull; {{ contractor.formatted_plan_price }}</span>
                     </div>
                     <h2 class="text-2xl font-black text-white">{{ contractor.business_name }}</h2>
                     <p class="text-xs text-slate-300 mt-1">
@@ -141,13 +141,13 @@
             <div class="flex items-center gap-2">
                 <a href="#direct-bank-payment" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-building-columns"></i>
-                    <span data-i18n="upgrade_now_btn">Upgrade to Pro ($99/mo)</span>
+                    <span data-i18n="upgrade_now_btn">Upgrade to Pro ({{ contractor.formatted_plan_price }})</span>
                 </a>
             </div>
         </div>
 
         <!-- ============================================================================== -->
-        <!-- DIRECT US BANK PAYMENT (LEAD BANK VIA GREY USD)                                -->
+        <!-- DIRECT BANK PAYMENT (LEAD BANK VIA GREY USD)                                  -->
         <!-- ============================================================================== -->
         <div id="direct-bank-payment" class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl relative overflow-hidden">
             <div class="absolute -right-12 -top-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -155,18 +155,18 @@
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-building-columns"></i> <span data-i18n="ach_payment_badge">Direct US Bank ACH Transfer</span>
+                        <i class="fa-solid fa-building-columns"></i> <span data-i18n="ach_payment_badge">Direct Bank Transfer (Wire / ACH)</span>
                     </div>
                     <h3 class="text-2xl font-black text-white" data-i18n="ach_title">
-                        Zero-Fee US Bank ACH Payment
+                        Zero-Fee Direct Bank Payment
                     </h3>
                     <p class="text-xs sm:text-sm text-slate-400 mt-1" data-i18n="ach_subtitle">
-                        Pay your $99.00/mo subscription directly from your US Business Bank (Chase, Bank of America, Wells Fargo, QuickBooks).
+                        Pay your {{ contractor.formatted_plan_price }} subscription directly from your Bank (USA, Belgique, Suisse, International).
                     </p>
                 </div>
                 <div class="bg-slate-950 border border-slate-800 px-5 py-3 rounded-2xl text-right">
-                    <span class="text-3xl font-black text-emerald-400 font-mono">$99.00</span>
-                    <span class="text-xs text-slate-400 block font-semibold">USD / month (Tax Deductible)</span>
+                    <span class="text-3xl font-black text-emerald-400 font-mono">{{ contractor.currency_symbol }} {{ "{:,.2f}".format(contractor.monthly_plan_price) }}</span>
+                    <span class="text-xs text-slate-400 block font-semibold">{{ contractor.currency }} / month (Tax Deductible)</span>
                 </div>
             </div>
 

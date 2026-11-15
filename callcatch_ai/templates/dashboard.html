@@ -35,15 +35,25 @@
                     </span>
                 </div>
 
-                <!-- Twilio US Number Badge -->
+                <!-- Country Switcher (USA / Belgique / Suisse) -->
+                <form action="/api/contractor/update-country" method="POST" class="inline flex items-center">
+                    <select name="country" onchange="this.form.submit()" title="Changer de pays / Switch Country"
+                        class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-400 cursor-pointer shadow">
+                        <option value="US" {% if contractor.country == 'US' or not contractor.country %}selected{% endif %}>🇺🇸 USA ($)</option>
+                        <option value="BE" {% if contractor.country == 'BE' %}selected{% endif %}>🇧🇪 Belgique (€)</option>
+                        <option value="CH" {% if contractor.country == 'CH' %}selected{% endif %}>🇨🇭 Suisse (CHF)</option>
+                    </select>
+                </form>
+
+                <!-- Phone Line Badge -->
                 <div class="hidden sm:block bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300">
-                    Twilio: <span class="text-cyan-400">{{ contractor.twilio_phone_number }}</span>
+                    Ligne: <span class="text-cyan-400">{{ contractor.twilio_phone_number }}</span>
                 </div>
 
                 <!-- Plan / Billing Badge Button -->
                 <a href="/billing" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition {% if contractor.is_active_pro %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20{% else %}bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20{% endif %}" title="Manage Subscription">
                     <i class="fa-solid {% if contractor.is_active_pro %}fa-circle-check{% else %}fa-hourglass-half{% endif %}"></i>
-                    <span>{% if contractor.is_active_pro %}PRO ($99/mo){% else %}Trial ({{ contractor.days_left_in_trial }}d){% endif %}</span>
+                    <span>{% if contractor.is_active_pro %}PRO ({{ contractor.formatted_plan_price }}){% else %}Trial ({{ contractor.days_left_in_trial }}d){% endif %}</span>
                 </a>
 
                 <!-- LANGUAGE TOGGLE BUTTON (FR / EN) -->
@@ -76,7 +86,7 @@
                         <i class="fa-solid fa-bolt"></i> <span data-i18n="revenue_badge">Live Revenue Protection</span>
                     </div>
                     <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                        ${{ "{:,.2f}".format(total_revenue_saved) }}
+                        {{ contractor.currency_symbol }} {{ "{:,.2f}".format(total_revenue_saved) }}
                     </h2>
                     <p class="text-sm text-slate-400 mt-1">
                         <span data-i18n="revenue_desc_prefix">Estimated revenue saved from</span>
@@ -88,7 +98,16 @@
                 <!-- Live Test Simulation Button -->
                 <form action="/api/demo/simulate-missed-call" method="POST" class="flex-shrink-0">
                     <button type="submit" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-5 py-3 rounded-xl shadow-lg shadow-emerald-500/25 transition-all transform hover:scale-[1.02] flex items-center gap-2 text-sm">
-                        <i class="fa-solid fa-phone-slash"></i> <span data-i18n="btn_simulate">Simulate US Missed Call (Demo)</span>
+                        <i class="fa-solid fa-phone-slash"></i> 
+                        <span>
+                            {% if contractor.country == 'BE' %}
+                            🇧🇪 Simuler Appel Manqué (Bruxelles / Liège)
+                            {% elif contractor.country == 'CH' %}
+                            🇨🇭 Simuler Appel Manqué (Genève / Lausanne)
+                            {% else %}
+                            🇺🇸 Simulate Missed Call (Demo)
+                            {% endif %}
+                        </span>
                     </button>
                 </form>
             </div>
@@ -130,7 +149,7 @@
                 </div>
                 <div class="text-3xl font-extrabold text-amber-400">{{ stats.roi_multiplier }}x</div>
                 <div class="text-xs text-slate-500 mt-1">
-                    <span data-i18n="stat_roi_sub">On your</span> ${{ contractor.monthly_plan_price }}/<span data-i18n="month_unit">mo plan</span>
+                    <span data-i18n="stat_roi_sub">On your</span> {{ contractor.formatted_plan_price }}
                 </div>
             </div>
         </div>
