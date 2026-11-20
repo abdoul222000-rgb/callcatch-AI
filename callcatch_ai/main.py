@@ -1013,3 +1013,29 @@ def health_check():
         "runtime": "Vercel & Whop Ready",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@app.get("/robots.txt", response_class=Response)
+def robots_txt():
+    """Directive pour l'indexation par Google, Bing et réseaux sociaux"""
+    content = "User-agent: *\nAllow: /\nDisallow: /founder\nDisallow: /api/\nSitemap: https://callcatch-ai-ten.vercel.app/sitemap.xml\n"
+    return Response(content=content, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", response_class=Response)
+def sitemap_xml():
+    """Plan de site pour référencement naturel SEO mondial"""
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://callcatch-ai-ten.vercel.app/login</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://callcatch-ai-ten.vercel.app/register</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>"""
+    return Response(content=xml, media_type="application/xml")
