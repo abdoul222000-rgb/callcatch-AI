@@ -67,6 +67,10 @@ class Contractor(Base):
     subscription_id = Column(String(100), nullable=True)
     billing_email = Column(String(120), nullable=True)
     
+    # Intégration Whop (Merchant of Record)
+    whop_membership_id = Column(String(100), nullable=True, index=True)
+    whop_plan_id = Column(String(100), nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
 
     @property
@@ -201,6 +205,8 @@ def init_db():
                 "ALTER TABLE contractors ADD COLUMN billing_email VARCHAR(120)",
                 "ALTER TABLE contractors ADD COLUMN country VARCHAR(10) DEFAULT 'US'",
                 "ALTER TABLE contractors ADD COLUMN currency VARCHAR(10) DEFAULT 'USD'",
+                "ALTER TABLE contractors ADD COLUMN whop_membership_id VARCHAR(100)",
+                "ALTER TABLE contractors ADD COLUMN whop_plan_id VARCHAR(100)",
                 "ALTER TABLE subscription_orders ADD COLUMN currency VARCHAR(10) DEFAULT 'USD'"
             ]:
                 try:
