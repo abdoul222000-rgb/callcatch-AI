@@ -574,7 +574,8 @@ def billing_page(
     """Page de gestion de l'abonnement PRO pour l'artisan US"""
     return templates.TemplateResponse(request=request, name="billing.html", context={
         "contractor": current_contractor,
-        "checkout_url": settings.LEMON_SQUEEZY_CHECKOUT_URL,
+        "whop_checkout_url": settings.WHOP_PRO_CHECKOUT_URL,
+        "checkout_url": settings.WHOP_PRO_CHECKOUT_URL,
         "lead_bank_name": settings.LEAD_BANK_NAME,
         "lead_bank_beneficiary": settings.LEAD_BANK_BENEFICIARY_NAME,
         "lead_bank_account_number": settings.LEAD_BANK_ACCOUNT_NUMBER,

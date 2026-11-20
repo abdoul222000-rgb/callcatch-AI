@@ -139,15 +139,63 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="#direct-bank-payment" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-building-columns"></i>
-                    <span data-i18n="upgrade_now_btn">Upgrade to Pro ({{ contractor.formatted_plan_price }})</span>
+                <a href="{{ whop_checkout_url or 'https://whop.com/callcatch-ai-ten/callcatch-pro' }}" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs transition shadow-lg shadow-orange-500/25 flex items-center gap-2 cursor-pointer scale-100 hover:scale-105">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Activer PRO par Carte / Apple Pay ({{ contractor.formatted_plan_price }})</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                 </a>
             </div>
         </div>
 
         <!-- ============================================================================== -->
-        <!-- DIRECT BANK PAYMENT (LEAD BANK VIA GREY USD)                                  -->
+        <!-- OPTION 1 : WHOP INSTANT CHECKOUT (CARTE BANCAIRE, APPLE PAY, GOOGLE PAY)       -->
+        <!-- ============================================================================== -->
+        <div id="whop-card-payment" class="bg-gradient-to-r from-orange-950/40 via-slate-900 to-amber-950/40 border-2 border-orange-500/80 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-56 h-56 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-800 relative z-10">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-bolt text-yellow-400"></i> <span>Recommandé &bull; Activation Immédiate 24/7</span>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        Paiement par Carte, Apple Pay ou Google Pay
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                        Paiement 100% sécurisé via notre partenaire officiel <strong>Whop Inc.</strong> (Merchant of Record). Votre ligne IA et vos SMS illimités sont activés instantanément.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                    <div class="bg-slate-950/90 border border-slate-800 px-5 py-2.5 rounded-2xl text-left sm:text-right">
+                        <span class="text-2xl sm:text-3xl font-black text-orange-400 font-mono">{{ contractor.currency_symbol }} {{ "{:,.2f}".format(contractor.monthly_plan_price) }}</span>
+                        <span class="text-xs text-slate-400 block font-semibold">{{ contractor.currency }} / mois &bull; Sans engagement</span>
+                    </div>
+                    <a href="{{ whop_checkout_url or 'https://whop.com/callcatch-ai-ten/callcatch-pro' }}" target="_blank" rel="noopener noreferrer" 
+                       class="w-full sm:w-auto text-center px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 hover:from-orange-400 hover:to-yellow-300 text-slate-950 font-black text-sm transition shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transform hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>S'abonner via Whop Checkout</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Payment Badges -->
+            <div class="pt-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 relative z-10">
+                <div class="flex flex-wrap items-center gap-4 sm:gap-6 font-medium">
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-cc-visa text-slate-300 text-lg"></i> Visa</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-cc-mastercard text-slate-300 text-lg"></i> Mastercard</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-apple text-slate-300 text-lg"></i> Apple Pay</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-google-pay text-slate-300 text-lg"></i> Google Pay</span>
+                </div>
+                <div class="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
+                    <i class="fa-solid fa-shield-halved"></i> Chiffrement bancaire 256-bit SSL &bull; Annulable en 1 clic
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================================== -->
+        <!-- OPTION 2 : DIRECT BANK PAYMENT (LEAD BANK VIA GREY USD)                        -->
         <!-- ============================================================================== -->
         <div id="direct-bank-payment" class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl relative overflow-hidden">
             <div class="absolute -right-12 -top-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>

@@ -13,9 +13,9 @@ class Settings(BaseSettings):
     # Intégration Whop (Merchant of Record & Abonnements Internationaux)
     WHOP_API_KEY: str = os.getenv("WHOP_API_KEY", "")
     WHOP_WEBHOOK_SECRET: str = os.getenv("WHOP_WEBHOOK_SECRET", "")
-    WHOP_STARTER_CHECKOUT_URL: str = os.getenv("WHOP_STARTER_CHECKOUT_URL", "")
-    WHOP_PRO_CHECKOUT_URL: str = os.getenv("WHOP_PRO_CHECKOUT_URL", "")
-    WHOP_SCALE_CHECKOUT_URL: str = os.getenv("WHOP_SCALE_CHECKOUT_URL", "")
+    WHOP_STARTER_CHECKOUT_URL: str = os.getenv("WHOP_STARTER_CHECKOUT_URL", "https://whop.com/callcatch-ai-ten/callcatch-pro")
+    WHOP_PRO_CHECKOUT_URL: str = os.getenv("WHOP_PRO_CHECKOUT_URL", "https://whop.com/callcatch-ai-ten/callcatch-pro")
+    WHOP_SCALE_CHECKOUT_URL: str = os.getenv("WHOP_SCALE_CHECKOUT_URL", "https://whop.com/callcatch-ai-ten/callcatch-pro")
     
     # Identifiants Maître Fondateur / SuperAdmin (Accès VIP Privé CallCatch)
     CALLCATCH_FOUNDER_EMAIL: str = "abdoul222000@gmail.com"
