@@ -923,7 +923,6 @@ async def simulate_missed_call(
     return RedirectResponse(url="/dashboard", status_code=303)
 
 
-<<<<<<< HEAD
 @app.post("/api/contractor/update-country")
 async def update_contractor_country(
     request: Request,
