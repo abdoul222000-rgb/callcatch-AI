@@ -44,7 +44,7 @@
                 <!-- Payout Destination Badge -->
                 <div class="hidden lg:flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-mono text-slate-300">
                     <i class="fa-solid fa-building-columns text-emerald-400"></i>
-                    <span>Payout: <strong class="text-white">Lead Bank (US) ••••{{ lead_bank_last4 }}</strong></span>
+                    <span>Passerelle : <strong class="text-emerald-400">Whop</strong> ➔ Versement : <strong class="text-white">Lead Bank (US) ••••{{ lead_bank_last4 }}</strong></span>
                 </div>
 
                 <!-- Language Toggle Button -->
@@ -565,18 +565,18 @@
                             <i class="fa-solid fa-cart-shopping text-base"></i>
                         </div>
                         <h3 class="text-lg sm:text-xl font-black text-white tracking-tight" data-i18n="store_title">
-                            CallCatch Boutique & Subscriptions Engine
+                            Whop Subscriptions & Lead Bank Payouts
                         </h3>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-400" data-i18n="store_subtitle">
-                        Direct store orders, active paying clients, and Lead Bank revenue payouts
+                        Customer payments collected via Whop (Cards/Apple Pay) ➔ Direct ACH payout to Lead Bank
                     </p>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
                         <i class="fa-solid fa-check-circle"></i> 
-                        <span><strong class="font-mono text-white">{{ subscription_orders|length }}</strong> <span data-i18n="store_active_badge">Active Store Subscriptions</span></span>
+                        <span><strong class="font-mono text-white">{{ subscription_orders|length }}</strong> <span data-i18n="store_active_badge">Active Whop Subscriptions</span></span>
                     </span>
                 </div>
             </div>
@@ -591,16 +591,16 @@
                     </div>
 
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
-                        <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="store_mrr">Boutique MRR Encaissé</div>
+                        <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="store_mrr">MRR Whop Encaissé</div>
                         <div class="text-2xl font-black text-emerald-400 mt-1 font-mono">${{ "{:,.2f}".format(total_store_revenue) }} <span class="text-xs text-slate-400 font-normal">/ month</span></div>
                         <div class="text-[11px] text-slate-400 mt-1">Automatic Monthly Recurring Billing</div>
                     </div>
 
                     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
-                        <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="store_payout_target">Payout US Bank</div>
+                        <div class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider" data-i18n="store_payout_target">Versement Lead Bank (via Whop)</div>
                         <div class="text-base font-bold text-white mt-1 flex items-center gap-2">
                             <i class="fa-solid fa-building-columns text-emerald-400"></i>
-                            <span>Lead Bank (MO)</span>
+                            <span>Lead Bank (MO) via Whop Payout</span>
                         </div>
                         <div class="text-[11px] text-slate-400 font-mono mt-1">ACH Routing: {{ lead_bank_routing }} • Acc: ••••{{ lead_bank_last4 }}</div>
                     </div>
@@ -908,13 +908,13 @@
                 col_time: "Timing",
                 
                 // Section 2 - Store Subscriptions
-                store_title: "CallCatch Boutique & Subscriptions Engine",
-                store_subtitle: "Direct store orders, active paying clients, and Lead Bank revenue payouts",
-                store_active_badge: "Active Store Subscriptions",
+                store_title: "Whop Subscriptions & Lead Bank Payouts",
+                store_subtitle: "Customer payments collected via Whop (Cards/Apple Pay) ➔ Direct ACH payout to Lead Bank",
+                store_active_badge: "Active Whop Subscriptions",
                 store_total_subscribers: "Total Subscribed Clients",
-                store_mrr: "Boutique MRR Received",
-                store_payout_target: "Payout US Bank",
-                empty_orders: "0 active subscriptions in store. New US contractor subscriptions and direct deposits to Lead Bank will appear here automatically.",
+                store_mrr: "Whop MRR Collected",
+                store_payout_target: "Payout Destination (Lead Bank via Whop)",
+                empty_orders: "0 active subscriptions yet. As soon as an artisan subscribes on Whop, the transaction and direct deposit to Lead Bank will appear here automatically.",
                 col_order_id: "Order #",
                 col_customer_company: "Customer & Company",
                 col_zone: "Zone / City",
@@ -998,13 +998,13 @@
                 col_time: "Heure UTC",
                 
                 // Section 2 - Store Subscriptions
-                store_title: "Boutique CallCatch & Abonnements Encaissés",
-                store_subtitle: "Commandes directes de boutique, abonnements validés et encaissements Lead Bank",
-                store_active_badge: "Souscriptions Boutique Actives",
-                store_total_subscribers: "Clients Abonnés Boutique",
-                store_mrr: "MRR Boutique Encaissé",
-                store_payout_target: "Compte Bancaire US (Versement)",
-                empty_orders: "0 abonnement actif pour le moment. Les souscriptions réelles des artisans et les encaissements Lead Bank apparaîtront ici automatiquement dès le premier paiement.",
+                store_title: "Passerelle Whop & Versements Lead Bank",
+                store_subtitle: "Paiements clients encaissés par Whop (CB / Apple Pay) ➔ Versements automatiques vers votre compte Lead Bank",
+                store_active_badge: "Souscriptions Whop Actives",
+                store_total_subscribers: "Clients Abonnés Whop",
+                store_mrr: "MRR Whop Encaissé",
+                store_payout_target: "Versement Whop ➔ Lead Bank (US)",
+                empty_orders: "0 abonnement actif pour le moment. Dès qu'un artisan règle sur Whop, l'abonnement et le virement automatique vers Lead Bank apparaîtront ici.",
                 col_order_id: "N° Commande",
                 col_customer_company: "Client & Entreprise",
                 col_zone: "Zone / Ville",
