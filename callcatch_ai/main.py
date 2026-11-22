@@ -385,6 +385,8 @@ def founder_dashboard(
     ch_pct = round((ch_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
     us_pct = round((us_count / total_visitors) * 100, 1) if total_visitors > 0 else 0.0
 
+    analytics = compute_visitor_analytics(db, period="today")
+
     return templates.TemplateResponse(request=request, name="founder/dashboard.html", context={
         "contractors": contractors,
         "total_contractors": len(contractors),
@@ -410,8 +412,120 @@ def founder_dashboard(
         "ch_count": ch_count,
         "us_count": us_count,
         "lead_bank_routing": settings.LEAD_BANK_ROUTING,
-        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4
+        "lead_bank_last4": settings.LEAD_BANK_ACCOUNT_LAST4,
+        "analytics": analytics
     })
+
+
+@app.get("/api/founder/analytics")
+def founder_analytics_api(
+    period: str = "today",
+    start_date: str = None,
+    end_date: str = None,
+    authorized: bool = Depends(get_current_founder),
+    db: Session = Depends(get_db)
+):
+    """API d'audience et de trafic avec filtre temporel (Aujourd'hui, Hier, 7j, 30j, Personnalisé)"""
+    return compute_visitor_analytics(db, period=period, start_date_str=start_date, end_date_str=end_date)
+
+
+def compute_visitor_analytics(db: Session, period: str = "today", start_date_str: str = None, end_date_str: str = None):
+    now = datetime.utcnow()
+    
+    if period == "yesterday":
+        start_dt = datetime(now.year, now.month, now.day) - timedelta(days=1)
+        end_dt = datetime(now.year, now.month, now.day) - timedelta(seconds=1)
+        period_title = "Hier"
+    elif period == "7d":
+        start_dt = now - timedelta(days=7)
+        end_dt = now
+        period_title = "7 derniers jours"
+    elif period == "30d":
+        start_dt = now - timedelta(days=30)
+        end_dt = now
+        period_title = "30 derniers jours"
+    elif period == "custom" and start_date_str:
+        try:
+            start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
+            if end_date_str:
+                end_dt = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            else:
+                end_dt = now
+            period_title = f"{start_dt.strftime('%d/%m/%Y')} au {end_dt.strftime('%d/%m/%Y')}"
+        except Exception:
+            start_dt = datetime(now.year, now.month, now.day)
+            end_dt = now
+            period_title = "Aujourd'hui"
+    else:
+        period = "today"
+        start_dt = datetime(now.year, now.month, now.day)
+        end_dt = now
+        period_title = "Aujourd'hui"
+        
+    query = db.query(SiteVisitor).filter(SiteVisitor.visited_at >= start_dt, SiteVisitor.visited_at <= end_dt)
+    visitors = query.all()
+    
+    total_visits = len(visitors)
+    unique_visitors = len(set(v.ip_address for v in visitors if v.ip_address))
+    
+    page_counts = {}
+    for v in visitors:
+        p = v.page_visited or "/"
+        page_counts[p] = page_counts.get(p, 0) + 1
+    top_pages = [
+        {"path": p, "count": c, "pct": round((c / total_visits * 100), 1) if total_visits else 0}
+        for p, c in sorted(page_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    ]
+    
+    ref_counts = {}
+    for v in visitors:
+        ref = v.referrer or "Direct / WhatsApp"
+        ref_counts[ref] = ref_counts.get(ref, 0) + 1
+    top_referrers = [
+        {"source": s, "count": c, "pct": round((c / total_visits * 100), 1) if total_visits else 0}
+        for s, c in sorted(ref_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    ]
+    
+    mobile_count = sum(1 for v in visitors if "Mobile" in (v.device_type or ""))
+    desktop_count = total_visits - mobile_count
+    mobile_pct = round((mobile_count / total_visits * 100), 1) if total_visits else 0
+    desktop_pct = round((desktop_count / total_visits * 100), 1) if total_visits else 0
+    
+    if period in ["today", "yesterday"]:
+        chart_labels = ["00h-04h", "04h-08h", "08h-12h", "12h-16h", "16h-20h", "20h-24h"]
+        buckets = [0] * 6
+        for v in visitors:
+            idx = min(v.visited_at.hour // 4, 5)
+            buckets[idx] += 1
+        chart_data = buckets
+    else:
+        day_map = {}
+        curr = start_dt.date()
+        end_d = end_dt.date()
+        while curr <= end_d:
+            day_map[curr.strftime("%d %b")] = 0
+            curr += timedelta(days=1)
+        for v in visitors:
+            d_str = v.visited_at.strftime("%d %b")
+            if d_str in day_map:
+                day_map[d_str] += 1
+        chart_labels = list(day_map.keys())
+        chart_data = list(day_map.values())
+        
+    return {
+        "period": period,
+        "period_title": period_title,
+        "start_date": start_dt.strftime("%Y-%m-%d"),
+        "end_date": end_dt.strftime("%Y-%m-%d"),
+        "total_visits": total_visits,
+        "unique_visitors": unique_visitors,
+        "mobile_pct": mobile_pct,
+        "desktop_pct": desktop_pct,
+        "top_pages": top_pages,
+        "top_referrers": top_referrers,
+        "chart_labels": chart_labels,
+        "chart_data": chart_data
+    }
 
 
 @app.get("/founder/switch-to/{contractor_id}")

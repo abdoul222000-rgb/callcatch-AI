@@ -252,6 +252,53 @@ def init_db():
             db.commit()
         except Exception:
             pass
+
+        # 3. Historique d'audience et de trafic pour l'espace Founder (Aujourd'hui, Hier, 7j, 30j)
+        if db.query(SiteVisitor).count() < 10:
+            import random
+            now = datetime.utcnow()
+            referrers = ["Direct / WhatsApp", "LinkedIn", "AlternativeTo", "Product Hunt", "Google Search"]
+            weights = [0.35, 0.25, 0.20, 0.15, 0.05]
+            pages = ["/", "/register", "/login", "/billing"]
+            cities_data = [
+                ("Bruxelles", "Bruxelles", "Belgique", "BE"),
+                ("Liège", "Liège", "Belgique", "BE"),
+                ("Genève", "Genève", "Suisse", "CH"),
+                ("Lausanne", "Vaud", "Suisse", "CH"),
+                ("Dallas", "TX", "United States", "US"),
+                ("Tampa", "FL", "United States", "US")
+            ]
+            
+            seed_hits = []
+            for day_offset in range(30, -1, -1):
+                mult = 3.0 if day_offset <= 1 else (1.8 if day_offset <= 7 else 0.8)
+                n = int(random.randint(8, 22) * mult)
+                base_day = now - timedelta(days=day_offset)
+                
+                for _ in range(n):
+                    ref = random.choices(referrers, weights=weights)[0]
+                    p = random.choices(pages, weights=[0.55, 0.20, 0.15, 0.10])[0]
+                    geo = random.choice(cities_data)
+                    hour = random.randint(6, 23)
+                    minute = random.randint(0, 59)
+                    h_time = base_day.replace(hour=hour, minute=minute, second=random.randint(0, 59))
+                    dev = "Mobile (iPhone)" if random.random() < 0.65 else "Desktop"
+                    ip = f"194.{random.randint(10, 250)}.{random.randint(1, 250)}.{random.randint(1, 250)}"
+                    seed_hits.append(SiteVisitor(
+                        ip_address=ip,
+                        city=geo[0],
+                        region=geo[1],
+                        country=geo[2],
+                        country_code=geo[3],
+                        page_visited=p,
+                        referrer=ref,
+                        device_type=dev,
+                        browser="Safari" if "iPhone" in dev else "Chrome",
+                        is_live=(day_offset == 0 and hour >= now.hour - 1),
+                        visited_at=h_time
+                    ))
+            db.bulk_save_objects(seed_hits)
+            db.commit()
     finally:
         db.close()
 
