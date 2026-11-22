@@ -78,11 +78,14 @@
                 </div>
 
                 <!-- Demo quick fill hint -->
-                <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
                     <div>
                         <span class="text-emerald-400 font-semibold" data-i18n="demo_account">Demo account:</span> 
                         <span class="font-mono">mike@lonestarplumbing.com</span> / <span class="font-mono">password123</span>
                     </div>
+                    <a href="/demo-login" class="inline-flex items-center gap-1 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 font-bold px-2.5 py-1 rounded-lg text-[10px] transition">
+                        <i class="fa-solid fa-play text-[9px]"></i> <span data-i18n="btn_quick_demo">Accès 1 Clic</span>
+                    </a>
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/25 transition transform hover:scale-[1.01] text-sm">
@@ -90,11 +93,19 @@
                 </button>
             </form>
 
-            <div class="mt-6 text-center text-xs text-slate-400 border-t border-slate-800/80 pt-5">
-                <span data-i18n="no_account">New contractor?</span>
-                <a href="/register" class="text-emerald-400 hover:text-emerald-300 font-semibold ml-1" data-i18n="link_register">
-                    Create an account (Start Free Trial)
-                </a>
+            <div class="mt-6 text-center text-xs text-slate-400 border-t border-slate-800/80 pt-5 space-y-2">
+                <div>
+                    <span data-i18n="no_account">New contractor?</span>
+                    <a href="/register" class="text-emerald-400 hover:text-emerald-300 font-semibold ml-1" data-i18n="link_register">
+                        Create an account (Start Free Trial)
+                    </a>
+                </div>
+                <div>
+                    <a href="/" class="text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5 text-[11px] pt-1">
+                        <i class="fa-solid fa-arrow-left text-[10px] text-emerald-400"></i>
+                        <span data-i18n="link_to_sim">Tester le Simulateur d'Appel en direct</span>
+                    </a>
+                </div>
             </div>
         </div>
     </main>
@@ -113,6 +124,8 @@
                 password_label: "Password",
                 demo_account: "Demo account:",
                 btn_login: "Sign In to Dashboard",
+                btn_quick_demo: "1-Click Demo",
+                link_to_sim: "Test the Live Call Simulator",
                 no_account: "New contractor?",
                 link_register: "Create an account (Start Free Trial)"
             },
@@ -123,6 +136,8 @@
                 password_label: "Mot de Passe",
                 demo_account: "Compte démo :",
                 btn_login: "Se Connecter au Dashboard",
+                btn_quick_demo: "Accès 1 Clic",
+                link_to_sim: "Tester le Simulateur d'Appel en direct",
                 no_account: "Nouvel artisan ?",
                 link_register: "Créer un compte (Essai Gratuit)"
             }

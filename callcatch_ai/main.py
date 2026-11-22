@@ -120,13 +120,34 @@ def record_visitor_hit(request: Request, db: Session, page: str = "/"):
         pass
 
 
-@app.api_route("/", methods=["GET", "HEAD"])
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def index(request: Request, contractor = Depends(get_optional_contractor), db: Session = Depends(get_db)):
     if request.method == "HEAD":
         return Response(status_code=200)
     record_visitor_hit(request, db, page="/")
     if contractor:
         return RedirectResponse(url="/dashboard")
+    return templates.TemplateResponse(request=request, name="index.html", context={"contractor": contractor})
+
+
+@app.get("/demo-login")
+def demo_instant_login(request: Request, db: Session = Depends(get_db)):
+    """Connexion instantanée en 1 clic au compte de démonstration pour tester l'interface"""
+    record_visitor_hit(request, db, page="/demo-login")
+    contractor = db.query(Contractor).filter(Contractor.email == "mike@lonestarplumbing.com").first()
+    if not contractor:
+        contractor = db.query(Contractor).first()
+    if contractor:
+        session_token = create_signed_session_cookie(contractor.id, role="contractor")
+        response = RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+        response.set_cookie(
+            key="callcatch_session", 
+            value=session_token, 
+            max_age=86400 * 30, 
+            httponly=True, 
+            samesite="lax"
+        )
+        return response
     return RedirectResponse(url="/login")
 
 

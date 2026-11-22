@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CallCatch AI — Ne Perdez Plus Jamais un Chantier sur Appel Manqué</title>
+    <!-- SEO & Social OpenGraph Preview -->
+    <meta name="description" content="CallCatch AI répond par SMS en moins de 5 secondes à vos appels manqués, qualifie l'urgence de vos clients et réserve vos interventions pendant que vous travaillez.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://callcatch-ai-ten.vercel.app/">
+    <meta property="og:title" content="CallCatch AI — Sauveteur d'Appels Manqués pour Artisans">
+    <meta property="og:description" content="Réponse SMS en 5s par IA. Ne laissez plus vos concurrents voler vos clients quand vos mains sont occupées. Essai gratuit 7 jours.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1200&h=630&q=80">
+    <meta name="twitter:card" content="summary_large_image">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes phoneRing {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(8deg); }
+            40% { transform: rotate(-8deg); }
+            60% { transform: rotate(5deg); }
+            80% { transform: rotate(-5deg); }
+        }
+        .phone-ringing {
+            animation: phoneRing 0.5s ease-in-out infinite;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .phone-bezel {
+            box-shadow: 0 0 0 10px #0f172a, 0 0 0 12px #334155, 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .bubble-in {
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-slate-950">
+
+    <!-- NAVIGATION HEADER -->
+    <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-phone-arrow-down-left text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-xl tracking-tight text-white flex items-center gap-1.5">
+                        CallCatch <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">AI</span>
+                    </span>
+                    <span class="text-[10px] text-slate-400 tracking-wider font-semibold uppercase">Revenue Recovery</span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+                <a href="#simulateur" class="hover:text-emerald-400 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-emerald-400 text-xs"></i>
+                    <span data-i18n="nav_sim">Simulateur en Direct</span>
+                </a>
+                <a href="#fonctionnement" class="hover:text-emerald-400 transition" data-i18n="nav_how">Comment ça marche</a>
+                <a href="#calculateur" class="hover:text-emerald-400 transition" data-i18n="nav_roi">Calculateur de Pertes</a>
+                <a href="#tarifs" class="hover:text-emerald-400 transition" data-i18n="nav_pricing">Tarifs</a>
+            </nav>
+
+            <!-- Actions Right -->
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <button id="langToggleBtn" onclick="toggleLanguage()" 
+                    class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer">
+                    <span id="langFlag">🇫🇷</span>
+                    <span id="langLabel" class="text-slate-200">FR</span>
+                </button>
+
+                <!-- Demo 1-Click Login -->
+                <a href="/demo-login" class="hidden sm:inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 transition hover:border-slate-600">
+                    <i class="fa-solid fa-play text-emerald-400 text-[10px]"></i>
+                    <span data-i18n="btn_demo">Démo en 1 clic</span>
+                </a>
+
+                <!-- Client Login -->
+                <a href="/login" class="text-xs font-bold text-slate-300 hover:text-white px-2 py-2 transition" data-i18n="btn_login">
+                    Connexion
+                </a>
+
+                <!-- Register CTA -->
+                <a href="/register" class="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition transform hover:scale-105">
+                    <span data-i18n="btn_trial">Essai Gratuit 7j</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden">
+        <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-emerald-500/15 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/2 right-0 w-[400px] h-[300px] bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-6 tracking-wide">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <i class="fa-solid fa-bolt"></i>
+                <span data-i18n="hero_badge">RÉPONSE PAR SMS EN MOINS DE 8 SECONDES • PROPULSÉ PAR L'IA</span>
+            </div>
+
+            <!-- Main Headline -->
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15] mb-6">
+                <span data-i18n="hero_title_1">Ne perdez plus jamais un chantier à</span><br class="hidden sm:inline">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400" data-i18n="hero_title_2">1 000 € sur un appel manqué.</span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed mb-8" data-i18n="hero_desc">
+                Vous avez les mains dans un évier ou sur un tableau électrique ? <strong class="text-slate-200">82 % des clients ne laissent aucun message vocal</strong> et appellent immédiatement votre concurrent sur Google. CallCatch AI envoie un SMS en 5 secondes, qualifie l'urgence et verrouille le chantier pour vous 24h/24.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+                <a href="#simulateur" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black px-8 py-4 rounded-2xl shadow-xl shadow-emerald-500/25 transition transform hover:scale-[1.02] text-sm">
+                    <i class="fa-solid fa-phone-volume"></i>
+                    <span data-i18n="hero_cta_sim">Tester le Simulateur en Direct (3s)</span>
+                </a>
+                <a href="/demo-login" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white font-bold px-7 py-4 rounded-2xl transition hover:border-slate-500 text-sm">
+                    <i class="fa-solid fa-desktop text-emerald-400"></i>
+                    <span data-i18n="hero_cta_demo">Ouvrir le Tableau de Bord Démo</span>
+                </a>
+            </div>
+
+            <!-- Key Proof Points -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto text-center border-t border-slate-800/80 pt-8">
+                <div>
+                    <div class="text-xl sm:text-2xl font-black text-white">&lt; 5s</div>
+                    <div class="text-xs text-slate-400 font-medium" data-i18n="stat_speed">Temps de réponse SMS</div>
+                </div>
+                <div>
+                    <div class="text-xl sm:text-2xl font-black text-emerald-400">82 %</div>
+                    <div class="text-xs text-slate-400 font-medium" data-i18n="stat_loss">Appels perdus sans SMS</div>
+                </div>
+                <div>
+                    <div class="text-xl sm:text-2xl font-black text-cyan-400">24h / 7j</div>
+                    <div class="text-xs text-slate-400 font-medium" data-i18n="stat_247">Disponibilité totale</div>
+                </div>
+                <div>
+                    <div class="text-xl sm:text-2xl font-black text-white">0 €</div>
+                    <div class="text-xs text-slate-400 font-medium" data-i18n="stat_trial">Frais d'essai (7 jours)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION SIMULATEUR CHOC INTERACTIF -->
+    <section id="simulateur" class="py-16 md:py-24 bg-slate-900/40 border-y border-slate-800/80 relative">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            
+            <div class="text-center mb-12">
+                <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest" data-i18n="sim_tag">EXPÉRIENCE EN TEMPS RÉEL</span>
+                <h2 class="text-2xl sm:text-4xl font-black text-white mt-2 tracking-tight" data-i18n="sim_headline">
+                    Voyez exactement comment CallCatch AI sauve vos chantiers
+                </h2>
+                <p class="text-slate-400 text-sm max-w-2xl mx-auto mt-2" data-i18n="sim_subhead">
+                    Renseignez le nom de votre entreprise, votre métier et votre pays, puis appuyez sur <strong>Simuler</strong> pour assister à la récupération en 5 secondes.
+                </p>
+            </div>
+
+            <!-- Dual Columns: Controls Left / Phone Right -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+                <!-- Left Column: Settings & Triggers (5 cols) -->
+                <div class="lg:col-span-5 glass-card p-6 sm:p-8 rounded-3xl space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="font-extrabold text-sm text-white" data-i18n="sim_box_title">Configuration de Votre Entreprise</span>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Étape 1 / 2</span>
+                    </div>
+
+                    <!-- Business Name Input -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5" data-i18n="sim_lbl_name">
+                            Nom de votre Société
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-building text-slate-500 absolute left-3.5 top-3 text-sm"></i>
+                            <input type="text" id="simBizName" value="Plomberie Martin" 
+                                oninput="syncInputs()"
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Trade / Specialty -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5" data-i18n="sim_lbl_trade">
+                            Votre Spécialité / Métier
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-wrench text-slate-500 absolute left-3.5 top-3 text-sm"></i>
+                            <select id="simTrade" onchange="syncInputs()" 
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer">
+                                <option value="plumbing" selected data-i18n="opt_plumb">Plomberie / Débouchage / Fuite d'urgence</option>
+                                <option value="hvac" data-i18n="opt_hvac">Chauffage / Chaudière / Climatisation</option>
+                                <option value="electrical" data-i18n="opt_elec">Électricité générale & Dépannage urgent</option>
+                                <option value="locksmith" data-i18n="opt_lock">Serrurerie / Porte claquée / Dépannage 24h</option>
+                                <option value="roofing" data-i18n="opt_roof">Couverture / Toiture / Fuite infiltrations</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down text-slate-500 absolute right-3.5 top-3.5 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Country / Location -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5" data-i18n="sim_lbl_country">
+                            Zone Géographique
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-location-dot text-slate-500 absolute left-3.5 top-3 text-sm"></i>
+                            <select id="simCountry" onchange="syncInputs()" 
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer">
+                                <option value="FR" selected>🇫🇷 France (Paris, Lyon, Marseille, Bordeaux...)</option>
+                                <option value="BE">🇧🇪 Belgique (Bruxelles, Liège, Namur, Charleroi...)</option>
+                                <option value="CH">🇨🇭 Suisse (Genève, Lausanne, Fribourg, Neuchâtel...)</option>
+                                <option value="US">🇺🇸 USA (New York, Texas, Florida, California...)</option>
+                                <option value="CA">🇨🇦 Canada (Montréal, Québec, Gatineau...)</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down text-slate-500 absolute right-3.5 top-3.5 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Client Scenario -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5" data-i18n="sim_lbl_urgency">
+                            Scénario d'Urgence Simulé
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 absolute left-3.5 top-3 text-sm"></i>
+                            <select id="simScenario" onchange="syncInputs()" 
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer">
+                                <option value="emergency_leak" selected data-i18n="scen_leak">Grosse fuite d'eau active (Inondation cuisine)</option>
+                                <option value="heater_broken" data-i18n="scen_heat">Chaudière en panne (Plus d'eau chaude ni chauffage)</option>
+                                <option value="power_outage" data-i18n="scen_elec">Court-circuit général (Disjoncteur qui saute)</option>
+                                <option value="locked_out" data-i18n="scen_door">Porte claquée avec clés à l'intérieur</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down text-slate-500 absolute right-3.5 top-3.5 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Run Simulation Button -->
+                    <button id="btnRunSim" onclick="triggerSimulation()" 
+                        class="w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-3 transition transform hover:scale-[1.02] cursor-pointer text-base">
+                        <i id="btnSimIcon" class="fa-solid fa-phone-volume text-lg"></i>
+                        <span id="btnSimText" data-i18n="btn_trigger_sim">LANCER L'APPEL EN DIRECT (SIMULATION)</span>
+                    </button>
+
+                    <!-- Realism Guarantee -->
+                    <p class="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 pt-1">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span data-i18n="sim_guarantee">Simulation 100% interactive sécurisée sans appel réel sur votre téléphone</span>
+                    </p>
+                </div>
+
+                <!-- Right Column: Interactive HD Smartphone Mockup (7 cols) -->
+                <div class="lg:col-span-7 flex justify-center">
+                    
+                    <div class="w-full max-w-[370px] sm:max-w-[400px] bg-slate-950 rounded-[44px] p-4 phone-bezel relative border border-slate-700/60">
+                        
+                        <!-- Speaker & Dynamic Island Top -->
+                        <div class="w-28 h-5 bg-slate-900 rounded-full mx-auto mb-3 flex items-center justify-center gap-2 border border-slate-800">
+                            <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                            <div class="w-8 h-1.5 rounded-full bg-slate-800"></div>
+                        </div>
+
+                        <!-- Phone Inner Screen -->
+                        <div class="bg-slate-900/95 rounded-[34px] p-4 min-h-[560px] flex flex-col justify-between border border-slate-800/80 relative overflow-hidden">
+                            
+                            <!-- Screen Ambient Glow -->
+                            <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
+
+                            <!-- Phone Top Status Bar -->
+                            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-3 px-1 border-b border-slate-800/60 pb-2">
+                                <span id="phoneClock">14:32</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-emerald-400 font-bold text-[10px]"><i class="fa-solid fa-signal"></i> 5G</span>
+                                    <i class="fa-solid fa-wifi text-slate-400"></i>
+                                    <i class="fa-solid fa-battery-three-quarters text-slate-300"></i>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 1: Incoming / Missed Call Banner -->
+                            <div id="simCallBanner" class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 transition duration-300 mb-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div id="callIconBox" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 text-base">
+                                            <i class="fa-solid fa-phone"></i>
+                                        </div>
+                                        <div>
+                                            <div id="callerNameDisplay" class="font-bold text-xs text-white">Jean-Pierre (Client Particulier)</div>
+                                            <div id="callStatusDisplay" class="text-[11px] text-slate-400">En attente d'un appel...</div>
+                                        </div>
+                                    </div>
+                                    <span id="callTimerBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-400">00:00</span>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 2: Chrono Reaction Badge -->
+                            <div id="simReactionBadge" class="hidden items-center justify-center gap-2 p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-bold mb-3 bubble-in">
+                                <i class="fa-solid fa-bolt animate-pulse"></i>
+                                <span id="reactionText">CallCatch AI activé en 4.2 secondes chrono</span>
+                            </div>
+
+                            <!-- Chat / SMS Conversation Thread -->
+                            <div id="smsThread" class="flex-1 space-y-3 overflow-y-auto px-1 py-2 text-xs flex flex-col justify-end">
+                                
+                                <div id="emptyThreadHint" class="text-center text-slate-500 py-16 space-y-2">
+                                    <i class="fa-solid fa-comment-sms text-3xl opacity-30"></i>
+                                    <p class="text-xs">Appuyez sur le bouton vert à gauche pour déclencher l'appel et voir le SMS s'écrire en direct.</p>
+                                </div>
+
+                                <!-- Messages will be dynamically appended here -->
+                            </div>
+
+                            <!-- Screen State 3: Final Jackpot Toast -->
+                            <div id="jackpotToast" class="hidden mt-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/50 bubble-in">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-black">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-[11px] font-black text-emerald-400 uppercase tracking-wider" data-i18n="toast_saved">CHANTIER SAUVÉ !</div>
+                                            <div id="toastAmount" class="text-xs font-bold text-white">Estimation : 450 € - 850 €</div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] bg-emerald-400/20 text-emerald-300 font-bold px-2 py-1 rounded-lg">100% Retenu</span>
+                                </div>
+                            </div>
+
+                            <!-- Phone Bottom Bar -->
+                            <div class="w-24 h-1 bg-slate-700 rounded-full mx-auto mt-3"></div>
+
+                        </div>
+
+                        <!-- Post-Simulation Instant CTA -->
+                        <div class="mt-4 text-center">
+                            <a href="/register" class="inline-flex items-center justify-center gap-2 text-xs font-extrabold text-emerald-400 hover:text-emerald-300 transition">
+                                <span data-i18n="phone_cta">Activer cette IA sur votre numéro dès aujourd'hui</span>
+                                <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION COMMENT ÇA MARCHE EN 3 ÉTAPES -->
+    <section id="fonctionnement" class="py-16 md:py-24 max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-16">
+            <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest" data-i18n="how_tag">INSTALLATION EN 2 MINUTES</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white mt-2 tracking-tight" data-i18n="how_headline">
+                Comment ça fonctionne pour vous sur le terrain ?
+            </h2>
+            <p class="text-slate-400 text-sm max-w-xl mx-auto mt-2" data-i18n="how_subhead">
+                Aucune application compliquée à installer. Tout passe par votre téléphone habituel.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Step 1 -->
+            <div class="glass-card p-8 rounded-3xl relative hover:border-slate-600 transition group">
+                <div class="w-12 h-12 rounded-2xl bg-slate-800 text-emerald-400 font-black text-lg flex items-center justify-center mb-6 group-hover:scale-110 transition border border-slate-700">
+                    1
+                </div>
+                <h3 class="text-lg font-black text-white mb-3" data-i18n="step1_title">Activez le renvoi d'appels</h3>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="step1_desc">
+                    Depuis les réglages de votre smartphone, activez le "Renvoi si occupé ou sans réponse" vers votre numéro dédié CallCatch AI. Cela prend exactement 60 secondes.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="glass-card p-8 rounded-3xl relative hover:border-slate-600 transition group border-emerald-500/40">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 text-slate-950 font-black text-lg flex items-center justify-center mb-6 group-hover:scale-110 transition shadow-lg shadow-emerald-500/20">
+                    2
+                </div>
+                <h3 class="text-lg font-black text-white mb-3" data-i18n="step2_title">L'IA répond en 5 secondes</h3>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="step2_desc">
+                    Dès qu'un client raccroche sans laisser de message, l'IA lui envoie un SMS ultra-professionnel avec le nom de votre entreprise. Elle qualifie sa panne et note son adresse.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="glass-card p-8 rounded-3xl relative hover:border-slate-600 transition group">
+                <div class="w-12 h-12 rounded-2xl bg-slate-800 text-cyan-400 font-black text-lg flex items-center justify-center mb-6 group-hover:scale-110 transition border border-slate-700">
+                    3
+                </div>
+                <h3 class="text-lg font-black text-white mb-3" data-i18n="step3_title">Intervenez et encaissez</h3>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="step3_desc">
+                    Vous recevez un récapitulatif propre sur votre tableau de bord et par SMS. Le client est sécurisé et n'a pas appelé votre concurrent. Vous n'avez plus qu'à intervenir.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION CALCULATEUR ROI (Combien perdez-vous chaque mois ?) -->
+    <section id="calculateur" class="py-16 md:py-24 bg-slate-900/50 border-t border-slate-800/80">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest" data-i18n="roi_tag">SIMULATION FINANCIÈRE</span>
+                <h2 class="text-2xl sm:text-4xl font-black text-white mt-2 tracking-tight" data-i18n="roi_headline">
+                    Calculez le chiffre d'affaires que vous perdez chaque mois
+                </h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto mt-2" data-i18n="roi_subhead">
+                    Déplacez les curseurs ci-dessous pour voir l'impact immédiat sur votre trésorerie.
+                </p>
+            </div>
+
+            <div class="glass-card p-8 sm:p-10 rounded-3xl space-y-8">
+                <!-- Sliders Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Slider 1 -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider" data-i18n="roi_lbl_calls">
+                                Appels manqués par semaine
+                            </label>
+                            <span id="sliderCallsVal" class="text-base font-black text-emerald-400">4 appels</span>
+                        </div>
+                        <input type="range" id="sliderCalls" min="1" max="25" value="4" oninput="calculateROI()"
+                            class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                            <span>1 appel</span>
+                            <span>12 appels</span>
+                            <span>25 appels</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider 2 -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider" data-i18n="roi_lbl_ticket">
+                                Valeur moyenne d'un chantier / dépannage
+                            </label>
+                            <span id="sliderTicketVal" class="text-base font-black text-cyan-400">450 €</span>
+                        </div>
+                        <input type="range" id="sliderTicket" min="150" max="2500" step="50" value="450" oninput="calculateROI()"
+                            class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+                        <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                            <span>150 €</span>
+                            <span>1 200 €</span>
+                            <span>2 500 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROI Outcome Box -->
+                <div class="p-6 rounded-2xl bg-slate-950 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider" data-i18n="roi_lost_monthly">Perte mensuelle estimée</div>
+                        <div id="roiLostMonthly" class="text-2xl sm:text-3xl font-black text-rose-400 mt-1">-5 904 € / mois</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5" data-i18n="roi_lost_sub">Parti chez vos concurrents</div>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider" data-i18n="roi_cost">Coût CallCatch AI</div>
+                        <div class="text-2xl sm:text-3xl font-black text-white mt-1">99 $ / mois</div>
+                        <div class="text-[10px] text-emerald-400 mt-0.5" data-i18n="roi_fixed">Forfait fixe sans commission</div>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider" data-i18n="roi_gain">Gain net potentiel</div>
+                        <div id="roiNetGain" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">+5 805 € / mois</div>
+                        <div class="text-[10px] text-emerald-300 font-bold mt-0.5" data-i18n="roi_boost">Retour sur investissement : +5 800 %</div>
+                    </div>
+                </div>
+
+                <div class="text-center pt-2">
+                    <a href="/register" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black px-8 py-3.5 rounded-xl shadow-lg shadow-emerald-500/25 transition transform hover:scale-105 text-sm">
+                        <span data-i18n="roi_cta">Arrêter de perdre ces milliers d'euros (Essai Gratuit)</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION TARIFS & ACCÈS -->
+    <section id="tarifs" class="py-16 md:py-24 max-w-4xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-12">
+            <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest" data-i18n="price_tag">TARIF SIMPLE & TRANSPARENT</span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white mt-2 tracking-tight" data-i18n="price_headline">
+                Un seul abonnement, rentabilisé dès le premier appel sauvé
+            </h2>
+            <p class="text-slate-400 text-sm max-w-md mx-auto mt-2" data-i18n="price_subhead">
+                Zéro mauvaise surprise. Zéro commission cachée sur vos chantiers.
+            </p>
+        </div>
+
+        <div class="max-w-md mx-auto glass-card rounded-3xl p-8 sm:p-10 border-2 border-emerald-500/50 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full" data-i18n="plan_badge">
+                    Plan PRO Artisans
+                </span>
+                <span class="text-xs text-slate-400 font-bold" data-i18n="plan_trial_badge">7 jours d'essai offerts</span>
+            </div>
+
+            <div class="flex items-baseline gap-2 mb-6">
+                <span class="text-5xl font-black text-white">99 $</span>
+                <span class="text-sm font-semibold text-slate-400" data-i18n="plan_period">/ mois (ou 99 €)</span>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed" data-i18n="plan_desc">
+                Conçu pour les artisans indépendants, TPE et PME du bâtiment qui veulent verrouiller 100% de leurs appels manqués sans embaucher.
+            </p>
+
+            <ul class="space-y-3.5 text-xs text-slate-200 mb-8">
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_1"><strong>SMS automatique en &lt; 5s</strong> dès qu'un appel est manqué</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_2"><strong>IA conversationnelle</strong> personnalisée avec le nom de votre boîte</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_3"><strong>Qualification des urgences</strong> (fuites, pannes, adresses exactes)</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_4"><strong>Tableau de bord privé</strong> avec alertes SMS & Web en temps réel</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_5"><strong>Numéro dédié inclus</strong> avec paramétrage en 2 minutes</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span data-i18n="feature_6"><strong>Sans engagement</strong> : résiliation en 1 clic sans préavis</span>
+                </li>
+            </ul>
+
+            <a href="/register" class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black py-4 rounded-xl shadow-lg shadow-emerald-500/25 transition transform hover:scale-[1.02] text-sm mb-3">
+                <span data-i18n="btn_start_trial">DÉMARRER MON ESSAI GRATUIT DE 7 JOURS</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+            <div class="text-center">
+                <a href="/demo-login" class="text-xs text-slate-400 hover:text-slate-200 transition font-semibold" data-i18n="link_or_demo">
+                    Ou tester le dashboard en démo 1 clic →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800/80 py-10 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2 text-slate-400 font-bold">
+                <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+                <span>CallCatch AI &copy; 2026 • Missed Call Text-Back & Revenue Recovery</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="#simulateur" class="hover:text-slate-300 transition" data-i18n="nav_sim">Simulateur</a>
+                <a href="/demo-login" class="hover:text-slate-300 transition" data-i18n="btn_demo">Compte Démo</a>
+                <a href="/founder/login" class="hover:text-emerald-400 transition font-mono text-[11px]">Espace Founder</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE SIMULATOR & LOCALIZATION LOGIC SCRIPT -->
+    <script>
+        // DICTIONNAIRE MULTILINGUE
+        const i18n = {
+            fr: {
+                nav_sim: "Simulateur en Direct",
+                nav_how: "Comment ça marche",
+                nav_roi: "Calculateur de Pertes",
+                nav_pricing: "Tarifs",
+                btn_demo: "Démo en 1 clic",
+                btn_login: "Connexion",
+                btn_trial: "Essai Gratuit 7j",
+                hero_badge: "RÉPONSE PAR SMS EN MOINS DE 8 SECONDES • PROPULSÉ PAR L'IA",
+                hero_title_1: "Ne perdez plus jamais un chantier à",
+                hero_title_2: "1 000 € sur un appel manqué.",
+                hero_desc: "Vous avez les mains dans un évier ou sur un tableau électrique ? 82 % des clients ne laissent aucun message vocal et appellent immédiatement votre concurrent sur Google. CallCatch AI envoie un SMS en 5 secondes, qualifie l'urgence et verrouille le chantier pour vous 24h/24.",
+                hero_cta_sim: "Tester le Simulateur en Direct (3s)",
+                hero_cta_demo: "Ouvrir le Tableau de Bord Démo",
+                stat_speed: "Temps de réponse SMS",
+                stat_loss: "Appels perdus sans SMS",
+                stat_247: "Disponibilité totale",
+                stat_trial: "Frais d'essai (7 jours)",
+                sim_tag: "EXPÉRIENCE EN TEMPS RÉEL",
+                sim_headline: "Voyez exactement comment CallCatch AI sauve vos chantiers",
+                sim_subhead: "Renseignez le nom de votre entreprise, votre métier et votre pays, puis appuyez sur Simuler pour assister à la récupération en 5 secondes.",
+                sim_box_title: "Configuration de Votre Entreprise",
+                sim_lbl_name: "Nom de votre Société",
+                sim_lbl_trade: "Votre Spécialité / Métier",
+                opt_plumb: "Plomberie / Débouchage / Fuite d'urgence",
+                opt_hvac: "Chauffage / Chaudière / Climatisation",
+                opt_elec: "Électricité générale & Dépannage urgent",
+                opt_lock: "Serrurerie / Porte claquée / Dépannage 24h",
+                opt_roof: "Couverture / Toiture / Fuite infiltrations",
+                sim_lbl_country: "Zone Géographique",
+                sim_lbl_urgency: "Scénario d'Urgence Simulé",
+                scen_leak: "Grosse fuite d'eau active (Inondation cuisine)",
+                scen_heat: "Chaudière en panne (Plus d'eau chaude ni chauffage)",
+                scen_elec: "Court-circuit général (Disjoncteur qui saute)",
+                scen_door: "Porte claquée avec clés à l'intérieur",
+                btn_trigger_sim: "LANCER L'APPEL EN DIRECT (SIMULATION)",
+                sim_guarantee: "Simulation 100% interactive sécurisée sans appel réel sur votre téléphone",
+                toast_saved: "CHANTIER SAUVÉ !",
+                phone_cta: "Activer cette IA sur votre numéro dès aujourd'hui",
+                how_tag: "INSTALLATION EN 2 MINUTES",
+                how_headline: "Comment ça fonctionne pour vous sur le terrain ?",
+                how_subhead: "Aucune application compliquée à installer. Tout passe par votre téléphone habituel.",
+                step1_title: "Activez le renvoi d'appels",
+                step1_desc: "Depuis les réglages de votre smartphone, activez le 'Renvoi si occupé ou sans réponse' vers votre numéro dédié CallCatch AI. Cela prend exactement 60 secondes.",
+                step2_title: "L'IA répond en 5 secondes",
+                step2_desc: "Dès qu'un client raccroche sans laisser de message, l'IA lui envoie un SMS ultra-professionnel avec le nom de votre entreprise. Elle qualifie sa panne et note son adresse.",
+                step3_title: "Intervenez et encaissez",
+                step3_desc: "Vous recevez un récapitulatif propre sur votre tableau de bord et par SMS. Le client est sécurisé et n'a pas appelé votre concurrent. Vous n'avez plus qu'à intervenir.",
+                roi_tag: "SIMULATION FINANCIÈRE",
+                roi_headline: "Calculez le chiffre d'affaires que vous perdez chaque mois",
+                roi_subhead: "Déplacez les curseurs ci-dessous pour voir l'impact immédiat sur votre trésorerie.",
+                roi_lbl_calls: "Appels manqués par semaine",
+                roi_lbl_ticket: "Valeur moyenne d'un chantier / dépannage",
+                roi_lost_monthly: "Perte mensuelle estimée",
+                roi_lost_sub: "Parti chez vos concurrents",
+                roi_cost: "Coût CallCatch AI",
+                roi_fixed: "Forfait fixe sans commission",
+                roi_gain: "Gain net potentiel",
+                roi_boost: "Retour sur investissement : +5 800 %",
+                roi_cta: "Arrêter de perdre ces milliers d'euros (Essai Gratuit)",
+                price_tag: "TARIF SIMPLE & TRANSPARENT",
+                price_headline: "Un seul abonnement, rentabilisé dès le premier appel sauvé",
+                price_subhead: "Zéro mauvaise surprise. Zéro commission cachée sur vos chantiers.",
+                plan_badge: "Plan PRO Artisans",
+                plan_trial_badge: "7 jours d'essai offerts",
+                plan_period: "/ mois (ou 99 €)",
+                plan_desc: "Conçu pour les artisans indépendants, TPE et PME du bâtiment qui veulent verrouiller 100% de leurs appels manqués sans embaucher.",
+                feature_1: "SMS automatique en < 5s dès qu'un appel est manqué",
+                feature_2: "IA conversationnelle personnalisée avec le nom de votre boîte",
+                feature_3: "Qualification des urgences (fuites, pannes, adresses exactes)",
+                feature_4: "Tableau de bord privé avec alertes SMS & Web en temps réel",
+                feature_5: "Numéro dédié inclus avec paramétrage en 2 minutes",
+                feature_6: "Sans engagement : résiliation en 1 clic sans préavis",
+                btn_start_trial: "DÉMARRER MON ESSAI GRATUIT DE 7 JOURS",
+                link_or_demo: "Ou tester le dashboard en démo 1 clic →"
+            },
+            en: {
+                nav_sim: "Live Simulator",
+                nav_how: "How it works",
+                nav_roi: "Revenue Loss Calculator",
+                nav_pricing: "Pricing",
+                btn_demo: "1-Click Demo",
+                btn_login: "Login",
+                btn_trial: "7-Day Free Trial",
+                hero_badge: "AI MISSED CALL TEXT-BACK IN UNDER 8 SECONDS",
+                hero_title_1: "Never lose a",
+                hero_title_2: "$1,000+ job to a missed call.",
+                hero_desc: "Hands stuck in a crawl space or on a live breaker panel? 82% of homeowners don't leave a voicemail and immediately call the next contractor on Google. CallCatch AI texts back in 5 seconds, qualifies the emergency, and books the job 24/7.",
+                hero_cta_sim: "Test the Live Simulator (3s)",
+                hero_cta_demo: "Open Demo Dashboard",
+                stat_speed: "SMS Response Time",
+                stat_loss: "Lost calls without SMS",
+                stat_247: "Always available",
+                stat_trial: "Zero setup fee (7 days)",
+                sim_tag: "REAL-TIME INTERACTIVE EXPERIENCE",
+                sim_headline: "See exactly how CallCatch AI saves your jobs",
+                sim_subhead: "Enter your company name, trade specialty, and region, then click Simulate to watch the 5-second recovery in real time.",
+                sim_box_title: "Your Business Setup",
+                sim_lbl_name: "Company Name",
+                sim_lbl_trade: "Your Trade / Specialty",
+                opt_plumb: "Plumbing / Drain Cleaning / Emergency Leaks",
+                opt_hvac: "Heating / HVAC / AC Repair",
+                opt_elec: "Electrical & Emergency Power Repair",
+                opt_lock: "Locksmith / Emergency Lockout 24/7",
+                opt_roof: "Roofing / Urgent Roof Leak Repair",
+                sim_lbl_country: "Service Region",
+                sim_lbl_urgency: "Simulated Emergency Scenario",
+                scen_leak: "Major active pipe burst (Kitchen flooding)",
+                scen_heat: "Furnace / Boiler breakdown (No heat or hot water)",
+                scen_elec: "Full power outage / Tripping main breaker",
+                scen_door: "Homeowner locked out with keys inside",
+                btn_trigger_sim: "TRIGGER LIVE CALL (SIMULATION)",
+                sim_guarantee: "100% interactive risk-free simulation. No real calls made to your phone.",
+                toast_saved: "JOB SECURED & SAVED!",
+                phone_cta: "Activate this AI on your number today",
+                how_tag: "2-MINUTE SETUP",
+                how_headline: "How does it work on the job site?",
+                how_subhead: "No complex app to install. Everything works through your regular phone.",
+                step1_title: "Enable call forwarding",
+                step1_desc: "From your phone settings, forward missed or busy calls to your dedicated CallCatch AI number. Takes 60 seconds.",
+                step2_title: "AI texts back in 5 seconds",
+                step2_desc: "As soon as a homeowner hangs up without leaving a voicemail, AI sends an instant polite SMS with your business name, asking for their emergency and address.",
+                step3_title: "Get paid and do the job",
+                step3_desc: "You receive the full qualified lead details on your dashboard and phone. The homeowner is locked in and stops searching competitors.",
+                roi_tag: "FINANCIAL CALCULATOR",
+                roi_headline: "Calculate how much revenue you lose every month",
+                roi_subhead: "Move the sliders below to see your immediate financial upside.",
+                roi_lbl_calls: "Missed calls per week",
+                roi_lbl_ticket: "Average job / repair ticket",
+                roi_lost_monthly: "Estimated Monthly Loss",
+                roi_lost_sub: "Given to your competitors",
+                roi_cost: "CallCatch AI Price",
+                roi_fixed: "Flat rate, zero commission",
+                roi_gain: "Potential Net Gain",
+                roi_boost: "Return on Investment: +5,800%",
+                roi_cta: "Stop losing thousands every month (Free Trial)",
+                price_tag: "SIMPLE & TRANSPARENT PRICING",
+                price_headline: "One flat plan, pays for itself with a single saved call",
+                price_subhead: "No surprises. Zero hidden commission on your repair jobs.",
+                plan_badge: "Contractor PRO Plan",
+                plan_trial_badge: "7-day free trial",
+                plan_period: "/ month",
+                plan_desc: "Built for solo trade pros and contractors who want to capture 100% of emergency calls without hiring an assistant.",
+                feature_1: "Instant SMS in < 5s when a call is missed",
+                feature_2: "Conversational AI personalized with your company name",
+                feature_3: "Emergency triage (leaks, power failures, exact addresses)",
+                feature_4: "Private web dashboard with instant SMS alerts",
+                feature_5: "Dedicated local number included with 2-min setup",
+                feature_6: "Zero commitment: cancel anytime with 1 click",
+                btn_start_trial: "START MY 7-DAY FREE TRIAL",
+                link_or_demo: "Or test the live demo dashboard in 1 click →"
+            }
+        };
+
+        let currentLang = localStorage.getItem('callcatch_lang') || 'fr';
+
+        function updateLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.textContent = i18n[lang][key];
+                }
+            });
+            const flag = document.getElementById('langFlag');
+            const label = document.getElementById('langLabel');
+            if (lang === 'fr') {
+                flag.textContent = '🇫🇷';
+                label.textContent = 'FR';
+            } else {
+                flag.textContent = '🇺🇸';
+                label.textContent = 'EN';
+            }
+            calculateROI();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'fr' ? 'en' : 'fr';
+            localStorage.setItem('callcatch_lang', currentLang);
+            updateLanguage(currentLang);
+        }
+
+        // SIMULATEUR DATA ENGINE
+        const scenarioPresets = {
+            emergency_leak: {
+                fr: {
+                    caller: "Jean-Pierre (Particulier)",
+                    callerText: "Bonjour ! J'ai une énorme fuite d'eau sous l'évier de la cuisine, ça coule partout sur le parquet ! Pouvez-vous passer d'urgence ?",
+                    address: "24 rue des Lilas",
+                    price: "350 € - 650 €"
+                },
+                en: {
+                    caller: "John Miller (Homeowner)",
+                    callerText: "Hi! I have a major active pipe burst under my kitchen sink flooding the floor! Can someone come out right away?",
+                    address: "742 Evergreen Terrace",
+                    price: "$450 - $850"
+                }
+            },
+            heater_broken: {
+                fr: {
+                    caller: "Claire Dupont (Particulière)",
+                    callerText: "Bonjour, ma chaudière s'est mise en sécurité rouge ce matin, nous n'avons plus d'eau chaude ni de chauffage avec les enfants. C'est urgent !",
+                    address: "18 avenue de la République",
+                    price: "450 € - 950 €"
+                },
+                en: {
+                    caller: "Sarah Jenkins (Homeowner)",
+                    callerText: "Hello, our furnace completely shut down with error code E04. We have no heat and it's freezing outside. Need emergency service!",
+                    address: "1042 West Maple Ave",
+                    price: "$500 - $1,100"
+                }
+            },
+            power_outage: {
+                fr: {
+                    caller: "Marc Lefèvre (Commerçant)",
+                    callerText: "Bonjour, le disjoncteur général de ma boutique saute dès que j'allume le compteur. Tout est coupé, j'ai besoin d'un dépannage rapide.",
+                    address: "5 place du Marché",
+                    price: "280 € - 550 €"
+                },
+                en: {
+                    caller: "David Ross (Store Owner)",
+                    callerText: "Hi, our main circuit breaker keeps tripping and half our commercial refrigerators have no power. Need an electrician ASAP!",
+                    address: "412 Commerce Street",
+                    price: "$350 - $750"
+                }
+            },
+            locked_out: {
+                fr: {
+                    caller: "Thomas Bernard (Particulier)",
+                    callerText: "Bonjour, je viens de claquer ma porte blindée avec les clés restées à l'intérieur sur la serrure ! Pouvez-vous intervenir pour ouvrir ?",
+                    address: "12 rue Pasteur",
+                    price: "180 € - 380 €"
+                },
+                en: {
+                    caller: "Michael Brown (Homeowner)",
+                    callerText: "Hi, I just locked myself out of my house with my keys inside. Need emergency lockout assistance to get back in!",
+                    address: "88 Ridge Road",
+                    price: "$180 - $350"
+                }
+            }
+        };
+
+        let isSimulating = false;
+
+        function syncInputs() {
+            if (isSimulating) return;
+            const biz = document.getElementById('simBizName').value.trim() || (currentLang === 'fr' ? 'Votre Entreprise' : 'Your Company');
+            const scenKey = document.getElementById('simScenario').value;
+            const preset = (scenarioPresets[scenKey] && scenarioPresets[scenKey][currentLang]) || scenarioPresets.emergency_leak[currentLang];
+            document.getElementById('callerNameDisplay').textContent = preset.caller;
+        }
+
+        function triggerSimulation() {
+            if (isSimulating) return;
+            isSimulating = true;
+
+            const biz = document.getElementById('simBizName').value.trim() || (currentLang === 'fr' ? 'Plomberie Martin' : 'Lone Star Services');
+            const scenKey = document.getElementById('simScenario').value;
+            const preset = (scenarioPresets[scenKey] && scenarioPresets[scenKey][currentLang]) || scenarioPresets.emergency_leak[currentLang];
+
+            const btn = document.getElementById('btnRunSim');
+            const btnText = document.getElementById('btnSimText');
+            const btnIcon = document.getElementById('btnSimIcon');
+            const callBanner = document.getElementById('simCallBanner');
+            const callIconBox = document.getElementById('callIconBox');
+            const callStatus = document.getElementById('callStatusDisplay');
+            const callTimer = document.getElementById('callTimerBadge');
+            const reactionBadge = document.getElementById('simReactionBadge');
+            const reactionText = document.getElementById('reactionText');
+            const smsThread = document.getElementById('smsThread');
+            const emptyHint = document.getElementById('emptyThreadHint');
+            const jackpot = document.getElementById('jackpotToast');
+            const toastAmount = document.getElementById('toastAmount');
+
+            // Reset UI
+            if (emptyHint) emptyHint.style.display = 'none';
+            smsThread.innerHTML = '';
+            jackpot.classList.add('hidden');
+            reactionBadge.classList.remove('flex');
+            reactionBadge.classList.add('hidden');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            btnIcon.className = "fa-solid fa-spinner fa-spin text-lg";
+            btnText.textContent = currentLang === 'fr' ? "SIMULATION EN COURS..." : "SIMULATION RUNNING...";
+
+            // PHASE 1: Incoming Phone Ringing (0s - 2.5s)
+            callBanner.className = "p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/50 transition duration-300 mb-3 phone-ringing";
+            callIconBox.className = "w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-base";
+            callIconBox.innerHTML = '<i class="fa-solid fa-phone-volume"></i>';
+            callStatus.className = "text-[11px] text-amber-400 font-bold";
+            callStatus.textContent = currentLang === 'fr' ? "Appel entrant... (Vos mains sont occupées)" : "Incoming call... (Your hands are busy)";
+            callTimer.textContent = "00:02";
+            callTimer.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300";
+
+            // PHASE 2: Call Missed (2.5s)
+            setTimeout(() => {
+                callBanner.classList.remove('phone-ringing');
+                callBanner.className = "p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 transition duration-300 mb-3";
+                callIconBox.className = "w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-base";
+                callIconBox.innerHTML = '<i class="fa-solid fa-phone-slash"></i>';
+                callStatus.className = "text-[11px] text-rose-400 font-bold";
+                callStatus.textContent = currentLang === 'fr' ? "Appel manqué (Le client raccroche sans message)" : "Missed call (Homeowner hangs up without voicemail)";
+                callTimer.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300";
+                callTimer.textContent = "00:04";
+            }, 2500);
+
+            // PHASE 3: CallCatch AI Triggers in 4.2s (4.2s)
+            setTimeout(() => {
+                reactionBadge.classList.remove('hidden');
+                reactionBadge.classList.add('flex');
+                reactionText.textContent = currentLang === 'fr' 
+                    ? "⚡ CallCatch AI déclenché en 4.2 secondes chrono"
+                    : "⚡ CallCatch AI auto-response sent in 4.2 seconds";
+
+                // AI Outgoing SMS
+                const aiMsgText = currentLang === 'fr'
+                    ? `Bonjour ! C'est l'assistant de ${biz}. Navré d'avoir manqué votre appel, je suis les mains prises en intervention. Quel est votre problème ou urgence et à quelle adresse pour qu'on intervienne ?`
+                    : `Hi! This is the automated assistant for ${biz}. Sorry we missed your call, we're currently on a job. What's your emergency and service address so we can assist right away?`;
+
+                appendSMSBubble('outgoing', aiMsgText, '14:32 • 4.2s');
+            }, 4200);
+
+            // PHASE 4: Homeowner Replies (6.8s)
+            setTimeout(() => {
+                appendSMSBubble('incoming', preset.callerText + ` (${preset.address})`, '14:33');
+            }, 6800);
+
+            // PHASE 5: AI Qualifies & Secures the Slot (9.2s)
+            setTimeout(() => {
+                const aiConfirmText = currentLang === 'fr'
+                    ? `Bien reçu pour ${preset.address} ! Votre urgence est prise en charge par ${biz}. Nous pouvons intervenir d'ici 45 minutes. Ne touchez à rien, votre créneau est réservé.`
+                    : `Got it for ${preset.address}! Emergency prioritized for ${biz}. A technician can be on site within 45 minutes. Your slot is officially locked in.`;
+
+                appendSMSBubble('outgoing', aiConfirmText, '14:33');
+            }, 9200);
+
+            // PHASE 6: Client Locks In & Jackpot Toast (11.5s)
+            setTimeout(() => {
+                const finalReply = currentLang === 'fr'
+                    ? "Parfait un grand merci, je vous attends et je ne cherche pas ailleurs !"
+                    : "Awesome thank you so much, I'll be waiting for you!";
+
+                appendSMSBubble('incoming', finalReply, '14:34');
+
+                // Jackpot Banner
+                jackpot.classList.remove('hidden');
+                toastAmount.textContent = `${currentLang === 'fr' ? 'Chantier Sauvé' : 'Job Secured'} • ${preset.price}`;
+
+                // Reset Button
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                btnIcon.className = "fa-solid fa-rotate-right text-lg";
+                btnText.textContent = currentLang === 'fr' ? "RELANCER UNE AUTRE SIMULATION" : "RUN ANOTHER SIMULATION";
+                isSimulating = false;
+            }, 11500);
+        }
+
+        function appendSMSBubble(type, text, time) {
+            const thread = document.getElementById('smsThread');
+            const bubble = document.createElement('div');
+            bubble.className = type === 'outgoing' 
+                ? 'bubble-in flex flex-col items-end' 
+                : 'bubble-in flex flex-col items-start';
+
+            const bgClass = type === 'outgoing'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] shadow-md'
+                : 'bg-slate-800 text-slate-200 border border-slate-700/80 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-md';
+
+            const label = type === 'outgoing'
+                ? '<div class="text-[9px] font-bold text-emerald-200 uppercase tracking-wider mb-1 flex items-center gap-1"><i class="fa-solid fa-robot"></i> CallCatch AI</div>'
+                : '<div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1"><i class="fa-solid fa-user"></i> Client</div>';
+
+            bubble.innerHTML = `
+                <div class="${bgClass}">
+                    ${label}
+                    <div class="leading-relaxed text-[11px]">${text}</div>
+                </div>
+                <span class="text-[9px] text-slate-500 font-mono mt-1 px-1">${time}</span>
+            `;
+
+            thread.appendChild(bubble);
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        // CALCULATEUR ROI ENGINE
+        function calculateROI() {
+            const calls = parseInt(document.getElementById('sliderCalls').value);
+            const ticket = parseInt(document.getElementById('sliderTicket').value);
+
+            document.getElementById('sliderCallsVal').textContent = `${calls} ${currentLang === 'fr' ? 'appels' : 'calls'}`;
+            document.getElementById('sliderTicketVal').textContent = currentLang === 'fr' ? `${ticket} €` : `$${ticket}`;
+
+            // Calculs : 82% des appels sont perdus sans système automatique
+            const monthlyLostJobs = calls * 4.33 * 0.82;
+            const monthlyLoss = Math.round(monthlyLostJobs * ticket);
+            const callcatchCost = 99; // $ ou €
+            const netGain = Math.max(0, monthlyLoss - callcatchCost);
+            const roiPct = Math.round((netGain / callcatchCost) * 100);
+
+            const curr = currentLang === 'fr' ? '€' : '$';
+            document.getElementById('roiLostMonthly').textContent = `-${monthlyLoss.toLocaleString()} ${curr} / ${currentLang === 'fr' ? 'mois' : 'mo'}`;
+            document.getElementById('roiNetGain').textContent = `+${netGain.toLocaleString()} ${curr} / ${currentLang === 'fr' ? 'mois' : 'mo'}`;
+            document.getElementById('roiBoost').textContent = `${currentLang === 'fr' ? 'Retour sur investissement' : 'Return on Investment'} : +${roiPct.toLocaleString()} %`;
+        }
+
+        // Live Clock in Smartphone
+        setInterval(() => {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const clockEl = document.getElementById('phoneClock');
+            if (clockEl) clockEl.textContent = `${h}:${m}`;
+        }, 1000);
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLanguage(currentLang);
+            syncInputs();
+            calculateROI();
+        });
+    </script>
+</body>
+</html>
