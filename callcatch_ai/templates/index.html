@@ -126,7 +126,14 @@
             </p>
 
             <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+                        <!-- Trust Badges Choc -->
+            <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300 font-semibold mb-6">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"><i class="fa-solid fa-shield-halved text-emerald-400"></i>Garantie 1er Chantier Sauvé ou 0 € débité</span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300"><i class="fa-solid fa-mobile-screen-button text-cyan-400"></i>Conservez votre numéro de mobile actuel</span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300"><i class="fa-solid fa-bolt text-yellow-400"></i>Actif en 2 minutes chrono</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                 <a href="#simulateur" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black px-8 py-4 rounded-2xl shadow-xl shadow-emerald-500/25 transition transform hover:scale-[1.02] text-sm">
                     <i class="fa-solid fa-phone-volume"></i>
                     <span data-i18n="hero_cta_sim">Tester le Simulateur en Direct (3s)</span>
@@ -557,6 +564,27 @@
                 <span data-i18n="btn_start_trial">DÉMARRER MON ESSAI GRATUIT DE 7 JOURS</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
+
+                        <!-- Boite Garantie Inconditionnelle Choc -->
+            <div class="mt-5 p-4 rounded-2xl bg-emerald-950/60 border-2 border-emerald-500/40 text-left shadow-xl relative overflow-hidden">
+                <div class="flex items-start gap-3 relative z-10">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-shield-halved text-base"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-emerald-300 uppercase tracking-wide">Garantie Absolue : 1er Chantier Sauvé ou 0 € débité</h4>
+                        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                            Si CallCatch ne vous permet pas de sauver au moins un devis/chantier (gain moyen constaté : <strong class="text-white">450 €</strong>) durant vos 7 jours d'essai, vous résiliez en 1 clic sans payer le moindre centime. <strong class="text-emerald-300">Zéro risque financier, tout à gagner.</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reassurance technique carte SIM -->
+            <div class="mt-4 mb-4 text-center text-[11px] text-slate-400 space-y-1.5">
+                <div><i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i><strong>Vous gardez votre numéro de portable actuel</strong> (compatible Orange, SFR, Bouygues, Free, Swisscom)</div>
+                <div><i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i><strong>Sans engagement</strong> : résiliation autonome en 1 clic sans formalité</div>
+            </div>
 
             <div class="text-center">
                 <a href="/demo-login" class="text-xs text-slate-400 hover:text-slate-200 transition font-semibold" data-i18n="link_or_demo">
@@ -989,7 +1017,7 @@
             const curr = currentLang === 'fr' ? '€' : '$';
             document.getElementById('roiLostMonthly').textContent = `-${monthlyLoss.toLocaleString()} ${curr} / ${currentLang === 'fr' ? 'mois' : 'mo'}`;
             document.getElementById('roiNetGain').textContent = `+${netGain.toLocaleString()} ${curr} / ${currentLang === 'fr' ? 'mois' : 'mo'}`;
-            document.getElementById('roiBoost').textContent = `${currentLang === 'fr' ? 'Retour sur investissement' : 'Return on Investment'} : +${roiPct.toLocaleString()} %`;
+            const bEl = document.getElementById('roiBoost'); if (bEl) bEl.textContent = `${currentLang === 'fr' ? 'Retour sur investissement' : 'Return on Investment'} : +${roiPct.toLocaleString()} %`;
         }
 
         // Live Clock in Smartphone
