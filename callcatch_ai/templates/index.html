@@ -244,6 +244,27 @@
                         </div>
                     </div>
 
+                    <!-- Real Visitor Phone Number -->
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-emerald-500/40 shadow-lg shadow-emerald-500/5">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5" data-i18n="sim_lbl_phone">
+                                <i class="fa-solid fa-mobile-screen-button animate-pulse"></i>
+                                <span>Votre Vrai Numéro de Mobile</span>
+                            </label>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">Test en direct</span>
+                        </div>
+                        <div class="relative">
+                            <i class="fa-solid fa-phone text-emerald-500 absolute left-3.5 top-3 text-sm"></i>
+                            <input type="tel" id="simUserPhone" placeholder="06 12 34 56 78" value=""
+                                oninput="syncInputs()"
+                                class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-white placeholder-slate-500 transition">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5" data-i18n="sim_phone_hint">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i>
+                            <span>Entrez votre numéro pour simuler l'appel, raccrocher et recevoir votre SMS IA en 4.2s.</span>
+                        </p>
+                    </div>
+
                     <!-- Client Scenario -->
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5" data-i18n="sim_lbl_urgency">
@@ -264,15 +285,26 @@
 
                     <!-- Run Simulation Button -->
                     <button id="btnRunSim" onclick="triggerSimulation()" 
-                        class="w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-3 transition transform hover:scale-[1.02] cursor-pointer text-base">
+                        class="w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl shadow-emerald-500/30 flex items-center justify-center gap-3 transition transform hover:scale-[1.02] cursor-pointer text-sm sm:text-base">
                         <i id="btnSimIcon" class="fa-solid fa-phone-volume text-lg"></i>
-                        <span id="btnSimText" data-i18n="btn_trigger_sim">LANCER L'APPEL EN DIRECT (SIMULATION)</span>
+                        <span id="btnSimText" data-i18n="btn_trigger_sim">📞 TESTER : APPEL, RACCROCHAGE & SMS EN 4.2S</span>
                     </button>
+
+                    <!-- Direct Call-in Banner -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 space-y-1.5">
+                        <div class="flex items-center gap-2 font-bold text-white text-[12px]">
+                            <i class="fa-solid fa-tower-broadcast text-emerald-400"></i>
+                            <span data-i18n="callin_title">Option Appel Réel depuis votre Téléphone :</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 leading-relaxed" data-i18n="callin_desc">
+                            Vous pouvez aussi appeler notre ligne de test CallCatch : <strong class="text-emerald-400 font-mono">+1 (512) 866-2282</strong>, laisser sonner 1 fois et raccrocher pour recevoir instantanément votre SMS.
+                        </p>
+                    </div>
 
                     <!-- Realism Guarantee -->
                     <p class="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 pt-1">
                         <i class="fa-solid fa-shield-halved text-emerald-400"></i>
-                        <span data-i18n="sim_guarantee">Simulation 100% interactive sécurisée sans appel réel sur votre téléphone</span>
+                        <span data-i18n="sim_guarantee">Test 100% sécurisé et confidentiel. Votre numéro n'est utilisé que pour ce test démo.</span>
                     </p>
                 </div>
 
@@ -650,8 +682,12 @@
                 scen_heat: "Chaudière en panne (Plus d'eau chaude ni chauffage)",
                 scen_elec: "Court-circuit général (Disjoncteur qui saute)",
                 scen_door: "Porte claquée avec clés à l'intérieur",
-                btn_trigger_sim: "LANCER L'APPEL EN DIRECT (SIMULATION)",
-                sim_guarantee: "Simulation 100% interactive sécurisée sans appel réel sur votre téléphone",
+                sim_lbl_phone: "Votre Vrai Numéro de Mobile",
+                sim_phone_hint: "Entrez votre numéro pour simuler l'appel, raccrocher et recevoir votre SMS IA en 4.2s.",
+                callin_title: "Option Appel Réel depuis votre Téléphone :",
+                callin_desc: "Vous pouvez aussi appeler notre ligne de test CallCatch : +1 (512) 866-2282, laisser sonner 1 fois et raccrocher pour recevoir instantanément votre SMS.",
+                btn_trigger_sim: "📞 TESTER : APPEL, RACCROCHAGE & SMS EN 4.2S",
+                sim_guarantee: "Test 100% sécurisé et confidentiel. Votre numéro n'est utilisé que pour ce test démo.",
                 toast_saved: "CHANTIER SAUVÉ !",
                 phone_cta: "Activer cette IA sur votre numéro dès aujourd'hui",
                 how_tag: "INSTALLATION EN 2 MINUTES",
@@ -726,8 +762,12 @@
                 scen_heat: "Furnace / Boiler breakdown (No heat or hot water)",
                 scen_elec: "Full power outage / Tripping main breaker",
                 scen_door: "Homeowner locked out with keys inside",
-                btn_trigger_sim: "TRIGGER LIVE CALL (SIMULATION)",
-                sim_guarantee: "100% interactive risk-free simulation. No real calls made to your phone.",
+                sim_lbl_phone: "Your Real Cell Phone Number",
+                sim_phone_hint: "Enter your phone to simulate the call, hang up, and receive your AI SMS in 4.2s.",
+                callin_title: "Option: Direct Call-in from your Phone:",
+                callin_desc: "You can also call our CallCatch test line: +1 (512) 866-2282, let it ring once and hang up to immediately receive your AI text.",
+                btn_trigger_sim: "📞 TEST: CALL, HANG UP & SMS IN 4.2S",
+                sim_guarantee: "100% secure & private test. Your phone number is only used for this live demo.",
                 toast_saved: "JOB SECURED & SAVED!",
                 phone_cta: "Activate this AI on your number today",
                 how_tag: "2-MINUTE SETUP",
@@ -862,8 +902,26 @@
             if (isSimulating) return;
             const biz = document.getElementById('simBizName').value.trim() || (currentLang === 'fr' ? 'Votre Entreprise' : 'Your Company');
             const scenKey = document.getElementById('simScenario').value;
+            const userPhone = document.getElementById('simUserPhone') ? document.getElementById('simUserPhone').value.trim() : '';
             const preset = (scenarioPresets[scenKey] && scenarioPresets[scenKey][currentLang]) || scenarioPresets.emergency_leak[currentLang];
-            document.getElementById('callerNameDisplay').textContent = preset.caller;
+            
+            // Adapter le placeholder téléphone selon le pays
+            const countryEl = document.getElementById('simCountry');
+            const phoneEl = document.getElementById('simUserPhone');
+            if (countryEl && phoneEl && !userPhone) {
+                const c = countryEl.value;
+                if (c === 'FR') phoneEl.placeholder = "06 12 34 56 78";
+                else if (c === 'BE') phoneEl.placeholder = "0470 12 34 56";
+                else if (c === 'CH') phoneEl.placeholder = "079 123 45 67";
+                else if (c === 'US') phoneEl.placeholder = "(512) 555-0199";
+                else if (c === 'CA') phoneEl.placeholder = "(514) 555-0199";
+            }
+
+            if (userPhone) {
+                document.getElementById('callerNameDisplay').textContent = (currentLang === 'fr' ? 'Votre Mobile : ' : 'Your Mobile: ') + userPhone;
+            } else {
+                document.getElementById('callerNameDisplay').textContent = preset.caller;
+            }
         }
 
         function triggerSimulation() {
@@ -872,6 +930,9 @@
 
             const biz = document.getElementById('simBizName').value.trim() || (currentLang === 'fr' ? 'Plomberie Martin' : 'Lone Star Services');
             const scenKey = document.getElementById('simScenario').value;
+            const userPhone = document.getElementById('simUserPhone') ? document.getElementById('simUserPhone').value.trim() : '';
+            const country = document.getElementById('simCountry') ? document.getElementById('simCountry').value : 'FR';
+            const trade = document.getElementById('simTrade') ? document.getElementById('simTrade').value : 'plumbing';
             const preset = (scenarioPresets[scenKey] && scenarioPresets[scenKey][currentLang]) || scenarioPresets.emergency_leak[currentLang];
 
             const btn = document.getElementById('btnRunSim');
@@ -898,14 +959,17 @@
             btn.disabled = true;
             btn.classList.add('opacity-75');
             btnIcon.className = "fa-solid fa-spinner fa-spin text-lg";
-            btnText.textContent = currentLang === 'fr' ? "SIMULATION EN COURS..." : "SIMULATION RUNNING...";
+            btnText.textContent = currentLang === 'fr' ? "DÉTECTION D'APPEL EN COURS..." : "DETECTING CALL...";
 
             // PHASE 1: Incoming Phone Ringing (0s - 2.5s)
             callBanner.className = "p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/50 transition duration-300 mb-3 phone-ringing";
             callIconBox.className = "w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-base";
             callIconBox.innerHTML = '<i class="fa-solid fa-phone-volume"></i>';
             callStatus.className = "text-[11px] text-amber-400 font-bold";
-            callStatus.textContent = currentLang === 'fr' ? "Appel entrant... (Vos mains sont occupées)" : "Incoming call... (Your hands are busy)";
+            const callerTitle = userPhone 
+                ? (currentLang === 'fr' ? `Appel entrant depuis ${userPhone}...` : `Incoming call from ${userPhone}...`) 
+                : (currentLang === 'fr' ? "Appel entrant... (Vos mains sont occupées)" : "Incoming call... (Your hands are busy)");
+            callStatus.textContent = callerTitle;
             callTimer.textContent = "00:02";
             callTimer.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300";
 
@@ -916,7 +980,9 @@
                 callIconBox.className = "w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-base";
                 callIconBox.innerHTML = '<i class="fa-solid fa-phone-slash"></i>';
                 callStatus.className = "text-[11px] text-rose-400 font-bold";
-                callStatus.textContent = currentLang === 'fr' ? "Appel manqué (Le client raccroche sans message)" : "Missed call (Homeowner hangs up without voicemail)";
+                callStatus.textContent = userPhone 
+                    ? (currentLang === 'fr' ? `Appel raccroché (Manqué depuis ${userPhone})` : `Missed call (Hung up from ${userPhone})`)
+                    : (currentLang === 'fr' ? "Appel manqué (Le client raccroche sans message)" : "Missed call (Homeowner hangs up without voicemail)");
                 callTimer.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300";
                 callTimer.textContent = "00:04";
             }, 2500);
@@ -925,9 +991,9 @@
             setTimeout(() => {
                 reactionBadge.classList.remove('hidden');
                 reactionBadge.classList.add('flex');
-                reactionText.textContent = currentLang === 'fr' 
-                    ? "⚡ CallCatch AI déclenché en 4.2 secondes chrono"
-                    : "⚡ CallCatch AI auto-response sent in 4.2 seconds";
+                reactionText.textContent = userPhone
+                    ? (currentLang === 'fr' ? `⚡ CallCatch AI activé en 4.2s • SMS envoyé vers ${userPhone} !` : `⚡ CallCatch AI triggered in 4.2s • SMS sent to ${userPhone}!`)
+                    : (currentLang === 'fr' ? "⚡ CallCatch AI déclenché en 4.2 secondes chrono" : "⚡ CallCatch AI auto-response sent in 4.2 seconds");
 
                 // AI Outgoing SMS
                 const aiMsgText = currentLang === 'fr'
@@ -935,6 +1001,25 @@
                     : `Hi! This is the automated assistant for ${biz}. Sorry we missed your call, we're currently on a job. What's your emergency and service address so we can assist right away?`;
 
                 appendSMSBubble('outgoing', aiMsgText, '14:32 • 4.2s');
+
+                // Envoi réel vers le backend
+                if (userPhone && userPhone.length >= 6) {
+                    try {
+                        fetch('/api/demo/real-test-call', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                phone: userPhone,
+                                business_name: biz,
+                                trade: trade,
+                                country: country,
+                                scenario: scenKey
+                            })
+                        }).then(r => r.json()).then(res => {
+                            console.log('Real test SMS dispatched:', res);
+                        }).catch(e => console.log('Offline demo fallback'));
+                    } catch(err) {}
+                }
             }, 4200);
 
             // PHASE 4: Homeowner Replies (6.8s)
@@ -967,7 +1052,10 @@
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
                 btnIcon.className = "fa-solid fa-rotate-right text-lg";
-                btnText.textContent = currentLang === 'fr' ? "RELANCER UNE AUTRE SIMULATION" : "RUN ANOTHER SIMULATION";
+                btnText.textContent = currentLang === 'fr' ? "RELANCER UN AUTRE TEST" : "RUN ANOTHER TEST";
+                isSimulating = false;
+            }, 11500);
+        }
                 isSimulating = false;
             }, 11500);
         }

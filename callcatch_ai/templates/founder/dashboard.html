@@ -117,7 +117,7 @@
                 <div class="text-2xl sm:text-3xl font-extrabold text-white">
                     <span class="text-emerald-400">{{ paying_contractors_count + total_subscribers }}</span> <span class="text-xs text-slate-400">paying</span>
                 </div>
-                <div class="text-[11px] text-slate-500 mt-1">{{ trial_contractors_count }} in 14-day free trial</div>
+                <div class="text-[11px] text-slate-500 mt-1">{{ trial_contractors_count }} in 7-day free trial</div>
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
@@ -669,7 +669,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="py-3.5 px-6 text-right font-mono text-xs text-slate-400">
-                                    {{ o.next_billing_date.strftime('%Y-%m-%d') if o.next_billing_date else 'In 14 days' }}
+                                    {{ o.next_billing_date.strftime('%Y-%m-%d') if o.next_billing_date else 'In 7 days' }}
                                 </td>
                             </tr>
                             {% endfor %}

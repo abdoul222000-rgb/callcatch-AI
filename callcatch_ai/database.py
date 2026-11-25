@@ -233,14 +233,14 @@ def init_db():
                 avg_ticket_usd=550.0,
                 monthly_plan_price=99.0,
                 subscription_status="TRIAL",
-                trial_ends_at=datetime.utcnow() + timedelta(days=12),
+                trial_ends_at=datetime.utcnow() + timedelta(days=7),
                 custom_missed_text="Hey! This is Mike with Lone Star Plumbing. Sorry I missed your call, I'm currently on a job. How can we help you right now?"
             )
             db.add(demo_contractor)
             db.commit()
         else:
             if not contractor.trial_ends_at:
-                contractor.trial_ends_at = datetime.utcnow() + timedelta(days=12)
+                contractor.trial_ends_at = datetime.utcnow() + timedelta(days=7)
                 contractor.subscription_status = "TRIAL"
                 db.commit()
 
