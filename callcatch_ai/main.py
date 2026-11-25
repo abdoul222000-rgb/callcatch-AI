@@ -815,64 +815,97 @@ async def lemonsqueezy_webhook(
 
 
 # ==============================================================================
-# WEBHOOKS TWILIO OFFICIELS
+# ==============================================================================
+# WEBHOOKS TWILIO OFFICIELS & APPELS EN DIRECT (CALL & HANGUP -> SMS IA)
 # ==============================================================================
 
-@app.post("/webhook/twilio/voice")
+@app.api_route("/webhook/twilio/voice", methods=["GET", "POST"])
+@app.api_route("/api/twilio/voice", methods=["GET", "POST"])
 async def twilio_voice_webhook(
     request: Request, 
     background_tasks: BackgroundTasks, 
     db: Session = Depends(get_db)
 ):
-    form_data = await request.form()
-    call_status = form_data.get("CallStatus", "no-answer")
-    caller_phone = form_data.get("From", "+15125550100")
+    """
+    Webhook Twilio Voice : 
+    Le client/visiteur appelle le numéro, Twilio déclenche ce webhook.
+    1. Le webhook renvoie immédiatement <Reject reason="busy"/> : l'appel coupe sans être décroché (0€ facturé au client).
+    2. En 4 secondes chrono, le SMS de qualification est expédié sur son numéro réel.
+    """
+    if request.method == "POST":
+        try:
+            form_data = await request.form()
+        except Exception:
+            form_data = {}
+    else:
+        form_data = request.query_params
+
+    call_status = form_data.get("CallStatus", "ringing")
+    caller_phone = form_data.get("From", "")
     twilio_number = form_data.get("To", settings.TWILIO_PHONE_NUMBER)
-    call_duration = int(form_data.get("CallDuration", 0))
+    call_duration = int(form_data.get("CallDuration", 0) or 0)
+
+    if not caller_phone or caller_phone.strip() == "":
+        caller_phone = "+15125550100"
 
     contractor = db.query(Contractor).filter(Contractor.twilio_phone_number == twilio_number).first()
     if not contractor:
         contractor = db.query(Contractor).first()
 
-    if call_status in ["no-answer", "busy", "failed"] or call_duration < 5:
-        missed_call = MissedCall(
-            contractor_id=contractor.id,
-            caller_phone=caller_phone,
-            caller_name="US Homeowner",
-            status="TEXT_SENT",
-            estimated_revenue_saved=contractor.avg_ticket_usd
-        )
-        db.add(missed_call)
-        db.commit()
-        db.refresh(missed_call)
+    # Enregistrement systématique de l'appel manqué / test en direct
+    missed_call = MissedCall(
+        contractor_id=contractor.id if contractor else 1,
+        caller_phone=caller_phone,
+        caller_name="US Homeowner / Client Test Direct",
+        status="TEXT_SENT",
+        estimated_revenue_saved=(contractor.avg_ticket_usd if contractor else 450.0)
+    )
+    db.add(missed_call)
+    db.commit()
+    db.refresh(missed_call)
 
+    biz_name = contractor.business_name if contractor else "CallCatch AI Plumbing"
+    owner_n = contractor.owner_name if contractor else "Support"
+    if contractor and contractor.custom_missed_text:
         sms_text = contractor.custom_missed_text.format(
-            owner_name=contractor.owner_name,
-            business_name=contractor.business_name
+            owner_name=owner_n,
+            business_name=biz_name
         )
+    else:
+        sms_text = f"Bonjour ! C'est l'assistant IA de {biz_name}. Navré d'avoir manqué votre appel, je suis les mains occupées sur un chantier. Quel est votre problème ou urgence et à quelle adresse pour qu'on intervienne rapidement ?"
 
-        background_tasks.add_task(send_sms_via_twilio, caller_phone, sms_text, twilio_number)
+    background_tasks.add_task(send_sms_via_twilio, caller_phone, sms_text, twilio_number)
 
-        sms_record = SMSMessage(
-            missed_call_id=missed_call.id,
-            direction="OUTBOUND",
-            sender=twilio_number,
-            receiver=caller_phone,
-            body=sms_text
-        )
-        db.add(sms_record)
-        db.commit()
+    sms_record = SMSMessage(
+        missed_call_id=missed_call.id,
+        direction="OUTBOUND",
+        sender=twilio_number,
+        receiver=caller_phone,
+        body=sms_text
+    )
+    db.add(sms_record)
+    db.commit()
 
-    return Response(content="<Response></Response>", media_type="application/xml")
+    # TwiML Reject : Raccrochage immédiat sans décrochage (ligne occupée / rejet gratuit)
+    twiml_response = '<?xml version="1.0" encoding="UTF-8"?><Response><Reject reason="busy"/></Response>'
+    return Response(content=twiml_response, media_type="application/xml")
 
 
-@app.post("/webhook/twilio/sms")
+@app.api_route("/webhook/twilio/sms", methods=["GET", "POST"])
+@app.api_route("/api/twilio/sms", methods=["GET", "POST"])
 async def twilio_sms_webhook(
     request: Request, 
     background_tasks: BackgroundTasks, 
     db: Session = Depends(get_db)
 ):
-    form_data = await request.form()
+    if request.method == "POST":
+        try:
+            form_data = await request.form()
+        except Exception:
+            form_data = {}
+    else:
+        form_data = request.query_params
+
     sender_phone = form_data.get("From", "")
     message_body = form_data.get("Body", "").strip()
     twilio_number = form_data.get("To", settings.TWILIO_PHONE_NUMBER)
@@ -939,7 +972,7 @@ async def twilio_sms_webhook(
     db.commit()
 
     return Response(
-        content=f"<Response><Message>{reply_body}</Message></Response>", 
+        content=f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{reply_body}</Message></Response>', 
         media_type="application/xml"
     )
 
