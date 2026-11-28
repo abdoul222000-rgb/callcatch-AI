@@ -1131,8 +1131,32 @@
             if (clockEl) clockEl.textContent = `${h}:${m}`;
         }, 1000);
 
-        // Initialisation
+        // Initialisation & Détection des Paramètres de Prospection (Hyper-Personnalisation)
         document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const bizParam = urlParams.get('biz') || urlParams.get('company') || urlParams.get('name');
+                const tradeParam = urlParams.get('trade');
+                const countryParam = urlParams.get('country');
+                const langParam = urlParams.get('lang');
+
+                if (langParam && (langParam === 'en' || langParam === 'fr')) {
+                    currentLang = langParam;
+                    try { localStorage.setItem('callcatch_lang', currentLang); } catch(e){}
+                }
+                if (bizParam && document.getElementById('simBizName')) {
+                    document.getElementById('simBizName').value = bizParam;
+                }
+                if (tradeParam && document.getElementById('simTrade')) {
+                    document.getElementById('simTrade').value = tradeParam;
+                }
+                if (countryParam && document.getElementById('simCountry')) {
+                    document.getElementById('simCountry').value = countryParam;
+                }
+            } catch(e) {
+                console.warn('URL param parse error', e);
+            }
+
             updateLanguage(currentLang);
             syncInputs();
             calculateROI();

@@ -102,6 +102,10 @@ def record_visitor_hit(request: Request, db: Session, page: str = "/"):
             region = cf_region or ("FL" if city == "Tampa" else "TX")
             country_name = "United States"
         
+        ref_param = request.query_params.get("ref") or request.query_params.get("prospect") or request.query_params.get("utm_source")
+        raw_ref = request.headers.get("referer", "Campaign Link")
+        ref_source = f"Prospect: {ref_param}" if ref_param else raw_ref
+
         visitor = SiteVisitor(
             ip_address=ip,
             city=city,
@@ -109,7 +113,7 @@ def record_visitor_hit(request: Request, db: Session, page: str = "/"):
             country=country_name,
             country_code=cf_c_upper,
             page_visited=page,
-            referrer=request.headers.get("referer", "Campaign Link"),
+            referrer=ref_source,
             device_type=device,
             browser=browser,
             is_live=True
